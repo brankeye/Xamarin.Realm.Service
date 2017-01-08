@@ -11,19 +11,19 @@ namespace xr.service.core.Library
 {
     public static class RealmService
     {
-        public static RealmService<T> GetInstance<T>()
+        public static IRealmService<T> GetInstance<T>()
             where T : RealmObject
         {
             return RealmService<T>.GetInstance();
         }
 
-        public static RealmService<T> GetInstance<T>(RealmConfigurationBase config)
+        public static IRealmService<T> GetInstance<T>(RealmConfigurationBase config)
             where T : RealmObject
         {
             return RealmService<T>.GetInstance(config);
         }
 
-        public static RealmService<T> GetInstance<T>(string databasePath)
+        public static IRealmService<T> GetInstance<T>(string databasePath)
             where T : RealmObject
         {
             return RealmService<T>.GetInstance(databasePath);
@@ -60,67 +60,47 @@ namespace xr.service.core.Library
         }
     }
 
-    public class RealmService<T>
+    public class RealmService<T> : RealmServiceBase<T>
         where T : RealmObject
     {
-        public RealmConfigurationBase Config => RealmInstance.Config;
+        protected RealmService() { }
 
-        public RealmSchema Schema => RealmInstance.Schema;
+        protected RealmService(RealmConfigurationBase config) : base(config) { }
 
-        public bool IsClosed => RealmInstance.IsClosed;
+        protected RealmService(string databasePath) : base(databasePath) { }
 
-        protected Realm RealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
-        protected Realm _realmInstance;
+        public override RealmConfigurationBase Config => RealmInstance.Config;
 
-        protected static IAutoIncrementer<T> AutoIncrementer { get; } 
-            = new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
+        public override RealmSchema Schema => RealmInstance.Schema;
 
-        protected static Func<Realm> RealmGetter { get; set; }
+        public override bool IsClosed => RealmInstance.IsClosed;
 
-        protected RealmService()
+        protected override IAutoIncrementer<T> CreateAutoIncrementer()
         {
-            RealmGetter = () => Realm.GetInstance();
-            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
+            return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
         }
 
-        protected RealmService(RealmConfigurationBase config)
-        {
-            RealmGetter = () => Realm.GetInstance(config);
-            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
-        }
-
-        protected RealmService(string databasePath)
-        {
-            RealmGetter = () => Realm.GetInstance(databasePath);
-            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
-        }
-
-        protected virtual T GetLargestPrimaryKeyQuery(Func<T, object> pkGetter)
-        {
-            return RealmInstance.All<T>().OrderByDescending(pkGetter).FirstOrDefault();
-        }
-
-        public static RealmService<T> GetInstance()
+        public static IRealmService<T> GetInstance()
         {
             return new RealmService<T>();
         }
 
-        public static RealmService<T> GetInstance(RealmConfigurationBase config)
+        public static IRealmService<T> GetInstance(RealmConfigurationBase config)
         {
             return new RealmService<T>(config);
         }
 
-        public static RealmService<T> GetInstance(string databasePath)
+        public static IRealmService<T> GetInstance(string databasePath)
         {
             return new RealmService<T>(databasePath);
         }
 
-        public virtual void Write(Action action)
+        public override void Write(Action action)
         {
             RealmInstance.Write(action);
         }
 
-        public Task WriteAsync(Action<RealmService<T>> action)
+        public override Task WriteAsync(Action<RealmService<T>> action)
         {
             if (action == null)
             {
@@ -138,19 +118,19 @@ namespace xr.service.core.Library
             });
         }
 
-        public Transaction BeginWrite()
+        public override Transaction BeginWrite()
         {
             return RealmInstance.BeginWrite();
         }
 
-        public virtual void Add(T item)
+        public override void Add(T item)
         {
             if (AutoIncrementer.IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
             RealmInstance.Add(item);
         }
 
-        public virtual void AddAll(IQueryable<T> list)
+        public override void AddAll(IQueryable<T> list)
         {
             foreach (var item in list)
             {
@@ -158,14 +138,14 @@ namespace xr.service.core.Library
             }
         }
 
-        public virtual void AddOrUpdate(T item)
+        public override void AddOrUpdate(T item)
         {
             if (AutoIncrementer.IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
             RealmInstance.Add(item, true);
         }
 
-        public virtual void AddOrUpdateAll(IQueryable<T> list)
+        public override void AddOrUpdateAll(IQueryable<T> list)
         {
             foreach (var item in list)
             {
@@ -173,82 +153,81 @@ namespace xr.service.core.Library
             }
         }
 
-        public virtual T Find(long? primaryKey)
+        public override T Find(long? primaryKey)
         {
             return RealmInstance.Find<T>(primaryKey);
         }
 
-        public virtual T Find(string primaryKey)
+        public override T Find(string primaryKey)
         {
             return RealmInstance.Find<T>(primaryKey);
         }
 
-        public virtual T Get(Expression<Func<T, bool>> predicate)
+        public override T Get(Expression<Func<T, bool>> predicate)
         {
             return RealmInstance.All<T>().FirstOrDefault(predicate);
         }
 
-        public virtual IQueryable<T> GetAll()
+        public override IQueryable<T> GetAll()
         {
             return RealmInstance.All<T>();
         }
 
-        public virtual IQueryable<T> GetAll(Expression<Func<T, bool>> predicate)
+        public override IQueryable<T> GetAll(Expression<Func<T, bool>> predicate)
         {
             return RealmInstance.All<T>().Where(predicate);
         }
 
-        public virtual IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate)
+        public override IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate)
         {
             return RealmInstance.All<T>().OrderBy(orderPredicate);
         }
 
-        public virtual IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate)
+        public override IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate)
         {
             return RealmInstance.All<T>().Where(wherePredicate).OrderBy(orderPredicate);
         }
 
-        public virtual void Remove(long? primaryKey)
+        public override void Remove(long? primaryKey)
         {
             var item = Find(primaryKey);
             Remove(item);
         }
 
-        public virtual void Remove(string primaryKey)
+        public override void Remove(string primaryKey)
         {
             var item = Find(primaryKey);
             Remove(item);
         }
 
-        public virtual void Remove(T item)
+        public override void Remove(T item)
         {
             RealmInstance.Remove(item);
         }
 
-        public virtual void RemoveAll()
+        public override void RemoveAll()
         {
             RealmInstance.RemoveAll<T>();
         }
 
-        public virtual void RemoveAll(IQueryable<T> list)
+        public override void RemoveAll(IQueryable<T> list)
         {
             RealmInstance.RemoveRange(list);
         }
 
-        public virtual bool Refresh()
+        public override bool Refresh()
         {
             return RealmInstance.Refresh();
         }
 
-        public virtual bool IsSameInstance(Realm realm)
+        public override bool IsSameInstance(Realm realm)
         {
             return RealmInstance.IsSameInstance(realm);
         }
 
-        public virtual void Dispose()
+        public override void Dispose()
         {
             RealmInstance.Dispose();
-            _realmInstance = null;
         }
     }
 }

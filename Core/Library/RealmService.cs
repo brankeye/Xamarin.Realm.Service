@@ -101,19 +101,19 @@ namespace xr.service.core.Library
         public RealmService()
         {
             RealmGetter = () => Realm.GetInstance();
-            HandleAutoIncrement(RealmInstance);
+            ConfigureAutoIncrement(RealmInstance);
         }
 
         public RealmService(RealmConfigurationBase config)
         {
             RealmGetter = () => Realm.GetInstance(config);
-            HandleAutoIncrement(RealmInstance);
+            ConfigureAutoIncrement(RealmInstance);
         }
 
         public RealmService(string databasePath)
         {
             RealmGetter = () => Realm.GetInstance(databasePath);
-            HandleAutoIncrement(RealmInstance);
+            ConfigureAutoIncrement(RealmInstance);
         }
 
         public virtual void Write(Action action)
@@ -277,7 +277,7 @@ namespace xr.service.core.Library
             return nextId;
         }
 
-        private static void HandleAutoIncrement(Realm realm)
+        private static void ConfigureAutoIncrement(Realm realm)
         {
             if (!IsAutoIncrementConfigured && IsAutoIncrementEnabled)
             {

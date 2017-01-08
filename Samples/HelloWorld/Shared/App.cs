@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Realms;
 using xr.service.core.Library;
 using xr.service.samples.helloworld.Shared.Models;
@@ -11,22 +12,22 @@ namespace xr.service.samples.helloworld.Shared
     {
         public App()
         {
-            TestService();
+            //RunServiceTests();
+            RunAsyncServiceTests();
+
+            MainPage = new ContentPage();
         }
 
-        protected void TestService()
+        protected void RunServiceTests()
         {
             var realmService = RealmService.GetInstance<Models.Person>();
 
             realmService.Write(() =>
             {
-                realmService.RemoveAll();
                 realmService.Add(new Person { Name = "Greg" });
                 realmService.Add(new Person { Name = "Jim" });
                 realmService.Add(new Person { Name = "Bob" });
             });
-
-            var persons = realmService.GetAll().ToList();
 
             // OR
 
@@ -38,7 +39,69 @@ namespace xr.service.samples.helloworld.Shared
                 personsRealm.Add(new Person { Name = "Jinny" });
             });
 
-            var persons2 = personsRealm.GetAll().ToList();
+            var persons = personsRealm.GetAll().ToList();
+
+            personsRealm.Write(() =>
+            {
+                personsRealm.RemoveAll();
+            });
+        }
+
+        protected async void RunAsyncServiceTests()
+        {
+            await Task.WhenAll(
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest(),
+                RunAsyncTest());
+
+            var personsRealm = new PersonsRealm();
+            var persons = personsRealm.GetAll().ToList();
+
+            personsRealm.Write(() =>
+            {
+                personsRealm.RemoveAll();
+            });
+        }
+
+        protected Task RunAsyncTest()
+        {
+            var personsRealm = new PersonsRealm();
+            return personsRealm.WriteAsync(realmService =>
+            {
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+                realmService.Add(new Person { Name = "Jan" });
+                realmService.Add(new Person { Name = "June" });
+                realmService.Add(new Person { Name = "Jinny" });
+            });
         }
 
         protected override void OnStart()

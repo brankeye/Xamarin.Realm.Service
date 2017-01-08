@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -88,21 +89,16 @@ namespace xr.service.core.Library
         {
             var type = typeof(T);
             Property = type.GetRuntimeProperties().FirstOrDefault(x => x.IsDefined(typeof(PrimaryKeyAttribute)));
-            if (Property == null)
-            {
-                throw new NullReferenceException("RealmService Exception: Realm primary key not found on type " + type.Name + ".");
-            }
             if (Property != null)
             {
-                if (!Property.PropertyType.IsIntegral())
+                if (Property.PropertyType.IsIntegral())
                 {
-                    throw new NotSupportedException("RealmService Exception: Realm primary key is not of integral type on type " + type.Name + ".");
+                    if (Property.IsDefined(typeof(AutoIncrementAttribute))) IsAutoIncrementEnabled = true;
                 }
             }
-            if (Property.IsDefined(typeof(AutoIncrementAttribute))) IsAutoIncrementEnabled = true;
         }
 
-        public RealmService(bool autoIdsEnabled = false)
+        public RealmService()
         {
             RealmGetter = () => Realm.GetInstance();
             HandleAutoIncrement(RealmInstance);
@@ -150,11 +146,7 @@ namespace xr.service.core.Library
 
         public virtual void Add(T item)
         {
-            dynamic currentPrimaryKey = Property.GetValue(item);
-            if (IsAutoIncrementEnabled && currentPrimaryKey == 0)
-            {
-                Property.SetValue(item, Convert.ChangeType(GetAutoId(), Property.PropertyType));
-            }
+            if (IsAutoIncrementEnabled) AutoIncrementPrimaryKey(item);
             RealmInstance.Add(item);
         }
 
@@ -168,14 +160,7 @@ namespace xr.service.core.Library
 
         public virtual void AddOrUpdate(T item)
         {
-            if (IsAutoIncrementEnabled)
-            {
-                var itemPrimaryKey = (long)Convert.ChangeType(Property.GetValue(item), typeof(long));
-                if (itemPrimaryKey == 0)
-                {
-                    Property.SetValue(item, Convert.ChangeType(GetAutoId(), Property.PropertyType));
-                }
-            }
+            if (IsAutoIncrementEnabled) AutoIncrementPrimaryKey(item);
             RealmInstance.Add(item, true);
         }
 
@@ -190,11 +175,7 @@ namespace xr.service.core.Library
         public virtual T CreateObject(string className)
         {
             var item = RealmInstance.CreateObject(className);
-            dynamic currentPrimaryKey = Property.GetValue(item);
-            if (IsAutoIncrementEnabled && currentPrimaryKey == 0)
-            {
-                Property.SetValue(item, Convert.ChangeType(GetAutoId(), Property.PropertyType));
-            }
+            if (IsAutoIncrementEnabled) AutoIncrementPrimaryKey(item);
             return item;
         }
 
@@ -273,6 +254,16 @@ namespace xr.service.core.Library
         public virtual void Dispose()
         {
             RealmInstance.Dispose();
+            _realmInstance = null;
+        }
+
+        private void AutoIncrementPrimaryKey(T item)
+        {
+            var itemPrimaryKey = (long)Convert.ChangeType(Property.GetValue(item), typeof(long));
+            if (itemPrimaryKey == 0)
+            {
+                Property.SetValue(item, Convert.ChangeType(GetAutoId(), Property.PropertyType));
+            }
         }
 
         private static long GetAutoId()

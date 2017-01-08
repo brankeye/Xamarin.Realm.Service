@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Realms;
+using xr.service.core.Library.Attributes;
 using xr.service.core.Library.Extensions;
 using xr.service.core.Library.Utilities;
 
@@ -28,17 +29,6 @@ namespace xr.service.core.Library
             where T : RealmObject
         {
             return new RealmService<T>(databasePath);
-        }
-
-        public static void SetInstanceAutoIncrementEnabled<T>(bool isEnabled)
-            where T : RealmObject
-        {
-            RealmService<T>.IsAutoIncrementEnabled = isEnabled;
-        }
-
-        public static void SetDefaultConfiguration(RealmConfiguration config)
-        {
-            RealmConfiguration.DefaultConfiguration = config;
         }
 
         public static bool Compact(RealmConfigurationBase config = null)
@@ -75,9 +65,17 @@ namespace xr.service.core.Library
     public class RealmService<T>
         where T : RealmObject
     {
-        public static bool IsAutoIncrementEnabled { get; set; }
+        public RealmConfigurationBase Config => RealmInstance.Config;
+
+        public RealmSchema Schema => RealmInstance.Schema;
+
+        public bool IsClosed => RealmInstance.IsClosed;
 
         protected static PropertyInfo Property { get; set; }
+
+        protected static bool IsAutoIncrementEnabled { get; }
+
+        protected static bool IsAutoIncrementConfigured { get; private set; }
 
         protected Realm RealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
         private Realm _realmInstance;
@@ -88,37 +86,38 @@ namespace xr.service.core.Library
 
         static RealmService()
         {
-            if (IsAutoIncrementEnabled)
+            var type = typeof(T);
+            Property = type.GetRuntimeProperties().FirstOrDefault(x => x.IsDefined(typeof(PrimaryKeyAttribute)));
+            if (Property == null)
             {
-                var type = typeof(T);
-                Property = type.GetRuntimeProperties().FirstOrDefault(x => x.IsDefined(typeof(PrimaryKeyAttribute)));
-                if (Property == null)
-                {
-                    throw new NullReferenceException("RealmService Exception: Realm primary key not found on type " + type.Name + ".");
-                }
+                throw new NullReferenceException("RealmService Exception: Realm primary key not found on type " + type.Name + ".");
+            }
+            if (Property != null)
+            {
                 if (!Property.PropertyType.IsIntegral())
                 {
                     throw new NotSupportedException("RealmService Exception: Realm primary key is not of integral type on type " + type.Name + ".");
                 }
             }
+            if (Property.IsDefined(typeof(AutoIncrementAttribute))) IsAutoIncrementEnabled = true;
         }
 
-        public RealmService()
+        public RealmService(bool autoIdsEnabled = false)
         {
             RealmGetter = () => Realm.GetInstance();
-            GetLastId(RealmInstance);
+            HandleAutoIncrement(RealmInstance);
         }
 
         public RealmService(RealmConfigurationBase config)
         {
             RealmGetter = () => Realm.GetInstance(config);
-            GetLastId(RealmInstance);
+            HandleAutoIncrement(RealmInstance);
         }
 
         public RealmService(string databasePath)
         {
             RealmGetter = () => Realm.GetInstance(databasePath);
-            GetLastId(RealmInstance);
+            HandleAutoIncrement(RealmInstance);
         }
 
         public virtual void Write(Action action)
@@ -285,6 +284,15 @@ namespace xr.service.core.Library
         {
             var nextId = Interlocked.Increment(ref _lastId);
             return nextId;
+        }
+
+        private static void HandleAutoIncrement(Realm realm)
+        {
+            if (!IsAutoIncrementConfigured && IsAutoIncrementEnabled)
+            {
+                GetLastId(realm);
+            }
+            IsAutoIncrementConfigured = true;
         }
 
         private static void GetLastId(Realm realm)

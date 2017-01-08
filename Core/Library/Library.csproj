@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Attributes\AutoIncrement.cs" />
     <Compile Include="Extensions\TypeIsIntegralExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RealmService.cs" />

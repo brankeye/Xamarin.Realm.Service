@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Xamarin.Realm.Service</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>BrandonKeyes</authors>
+    <owners>BrandonKeyes</owners>
+    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
+    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Service Auto Id Autoincrement increment</tags>
+  </metadata>
+</package>

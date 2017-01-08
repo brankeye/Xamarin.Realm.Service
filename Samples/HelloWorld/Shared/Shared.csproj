@@ -41,7 +41,6 @@
     <Compile Include="Services\Realm\PersonsRealm.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="GettingStarted.Xamarin" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

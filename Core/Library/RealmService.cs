@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Realms;
-using Realms.Schema;
 using xr.service.core.Library.Attributes;
-using xr.service.core.Library.Extensions;
 using xr.service.core.Library.Helpers;
-using xr.service.core.Library.Utilities;
+using xr.service.core.Library.Interfaces;
 
 namespace xr.service.core.Library
 {
@@ -77,32 +72,32 @@ namespace xr.service.core.Library
         protected Realm RealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
         protected Realm _realmInstance;
 
-        protected static AutoIncrementer<T> AutoIncrementer { get; }
+        protected static IAutoIncrementer<T> AutoIncrementer { get; } 
+            = new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
 
         protected static Func<Realm> RealmGetter { get; set; }
-
-        static RealmService()
-        {
-            AutoIncrementer = new AutoIncrementer<T>();
-            AutoIncrementer.Initialize();
-        }
 
         protected RealmService()
         {
             RealmGetter = () => Realm.GetInstance();
-            AutoIncrementer.ConfigureAutoIncrement(RealmInstance);
+            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
         }
 
         protected RealmService(RealmConfigurationBase config)
         {
             RealmGetter = () => Realm.GetInstance(config);
-            AutoIncrementer.ConfigureAutoIncrement(RealmInstance);
+            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
         }
 
         protected RealmService(string databasePath)
         {
             RealmGetter = () => Realm.GetInstance(databasePath);
-            AutoIncrementer.ConfigureAutoIncrement(RealmInstance);
+            AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
+        }
+
+        protected virtual T GetLargestPrimaryKeyQuery(Func<T, object> pkGetter)
+        {
+            return RealmInstance.All<T>().OrderByDescending(pkGetter).FirstOrDefault();
         }
 
         public static RealmService<T> GetInstance()

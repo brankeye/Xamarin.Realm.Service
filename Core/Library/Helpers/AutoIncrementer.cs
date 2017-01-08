@@ -2,68 +2,79 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Realms;
-using Realms.Schema;
-using xr.service.core.Library.Attributes;
 using xr.service.core.Library.Extensions;
+using xr.service.core.Library.Interfaces;
 using xr.service.core.Library.Utilities;
 
 namespace xr.service.core.Library.Helpers
 {
-    public class AutoIncrementer<T>
-        where T : RealmObject
+    public class AutoIncrementer<T> : IAutoIncrementer<T>
     {
         public bool IsAutoIncrementEnabled { get; protected set; }
 
         public bool IsAutoIncrementConfigured { get; protected set; }
         
-        private PropertyInfo PrimaryKeyProperty { get; set; }
+        protected PropertyInfo PrimaryKeyProperty { get; set; }
 
         private long _lastId;
 
-        public void Initialize()
+        public AutoIncrementer(Type primaryKeyAttrType, Type autoIncrementAttrType)
         {
-            FindPrimaryKeyProperty(typeof(T));
-            IsAutoIncrementEnabled = PrimaryKeyProperty != null &&
-                                     PrimaryKeyProperty.IsDefined(typeof(AutoIncrementAttribute)) &&
-                                     PrimaryKeyProperty.PropertyType.IsIntegral();
+            InitializeInternal(primaryKeyAttrType, autoIncrementAttrType);
         }
 
-        public PropertyInfo FindPrimaryKeyProperty(Type type)
+        private void InitializeInternal(Type primaryKeyAttrType, Type autoIncrementAttrType)
         {
-            PrimaryKeyProperty = type.GetRuntimeProperties().FirstOrDefault(x => x.IsDefined(typeof(PrimaryKeyAttribute)));
-            return PrimaryKeyProperty;
+            Initialize(primaryKeyAttrType, autoIncrementAttrType);
         }
 
-        public void ConfigureAutoIncrement(Realm realm)
+        protected virtual void Initialize(Type primaryKeyAttrType, Type autoIncrementAttrType)
+        {
+            PrimaryKeyProperty = FindPropertyWithAttribute(typeof(T), primaryKeyAttrType);
+            IsAutoIncrementEnabled = IsAutoIncrementerEnabled(autoIncrementAttrType);
+        }
+
+        public virtual bool AutoIncrementPrimaryKey(T item)
+        {
+            if (IsAutoIncrementEnabled && IsAutoIncrementConfigured)
+            {
+                var itemPrimaryKey = (long)Convert.ChangeType(PrimaryKeyProperty.GetValue(item), typeof(long));
+                if (itemPrimaryKey == 0)
+                {
+                    PrimaryKeyProperty.SetValue(item, Convert.ChangeType(GetNextId(), PrimaryKeyProperty.PropertyType));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public virtual void ConfigureAutoIncrement(Func<Func<T, object>, T> getLargestPrimaryKeyQuery)
         {
             if (!IsAutoIncrementConfigured && IsAutoIncrementEnabled)
             {
-                GetLastId(realm);
+                GetLastId(getLargestPrimaryKeyQuery);
             }
             IsAutoIncrementConfigured = true;
         }
 
-        public void GetLastId(Realm realm)
+        protected virtual PropertyInfo FindPropertyWithAttribute(Type modelType, Type attrType)
         {
-            if (_lastId != 0) return;
+            return modelType.GetRuntimeProperties().FirstOrDefault(x => x.IsDefined(attrType));
+        }
+
+        protected virtual bool IsAutoIncrementerEnabled(Type autoIncrementAttrType)
+        {
+            var result = PrimaryKeyProperty != null &&
+                         PrimaryKeyProperty.IsDefined(autoIncrementAttrType) &&
+                         PrimaryKeyProperty.PropertyType.IsIntegral();
+            return result;
+        }
+
+        private void GetLastId(Func<Func<T, object>, T> getLargestPrimaryKeyQuery)
+        {
             var primaryKeyGetter = Expressions.CreatePropertyGetter<T>(PrimaryKeyProperty);
-            var item = realm.All<T>().OrderByDescending(primaryKeyGetter).FirstOrDefault();
+            var item = getLargestPrimaryKeyQuery.Invoke(primaryKeyGetter);
             if (item != null) _lastId = (long)Convert.ChangeType(PrimaryKeyProperty.GetValue(item), typeof(long));
-        }
-
-        public void AutoIncrementPrimaryKey(T item)
-        {
-            var itemPrimaryKey = (long)Convert.ChangeType(PrimaryKeyProperty.GetValue(item), typeof(long));
-            if (itemPrimaryKey == 0)
-            {
-                PrimaryKeyProperty.SetValue(item, Convert.ChangeType(GetAutoId(), PrimaryKeyProperty.PropertyType));
-            }
-        }
-
-        private long GetAutoId()
-        {
-            return GetNextId();
         }
 
         private long GetNextId()

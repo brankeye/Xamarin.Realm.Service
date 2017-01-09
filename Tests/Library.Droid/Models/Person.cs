@@ -1,7 +1,7 @@
-﻿using Realms;
+using Realms;
 using Xamarin.Realm.Service.Attributes;
 
-namespace xr.service.samples.helloworld.Shared.Models
+namespace Library.Droid.Models
 {
     public class Person : RealmObject
     {

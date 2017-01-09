@@ -1,10 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Realms;
-using xr.service.core.Library;
 using xr.service.samples.helloworld.Shared.Models;
 using xr.service.samples.helloworld.Shared.Services.Realm;
 using Xamarin.Forms;
+using Xamarin.Realm.Service;
 
 namespace xr.service.samples.helloworld.Shared
 {
@@ -31,7 +30,7 @@ namespace xr.service.samples.helloworld.Shared
 
             // OR
 
-            var personsRealm = new PersonsRealm();
+            var personsRealm = new PersonsRealmService();
             personsRealm.Write(() =>
             {
                 personsRealm.Add(new Person { Name = "Jan" });
@@ -63,7 +62,7 @@ namespace xr.service.samples.helloworld.Shared
                 RunAsyncTest(),
                 RunAsyncTest());
 
-            var personsRealm = new PersonsRealm();
+            var personsRealm = new PersonsRealmService();
             var persons = personsRealm.GetAll().ToList();
 
             personsRealm.Write(() =>
@@ -74,7 +73,7 @@ namespace xr.service.samples.helloworld.Shared
 
         protected Task RunAsyncTest()
         {
-            var personsRealm = new PersonsRealm();
+            var personsRealm = new PersonsRealmService();
             return personsRealm.WriteAsync(realmService =>
             {
                 realmService.Add(new Person { Name = "Jan" });

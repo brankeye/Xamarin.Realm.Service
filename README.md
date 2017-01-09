@@ -8,6 +8,7 @@ XRS is easy to use and works the same way under the hood as Xamarin.Realm.
 
 ### Using the AutoIncrement feature
 Apply the AutoIncrement Attribute to any RealmObject with a primary key of an integral type (short, int, long, etc).
+
 If the AutoIncrement attribute is applied to the primary key, the Add/AddOrUpdate service functions will autoincrement the primary key of the given RealmObject.
 ```csharp
 public class Person : RealmObject
@@ -109,7 +110,7 @@ public interface IRealmService<T>
 
 ## Extensibility
 XRS is designed so that developers can customize the service if there are portions that do not work as expected.
-All of the properties and functions defined in the API section above can be overrideen and reimplemented.
+All of the properties and functions defined in the API section above can be overridden and reimplemented.
 
 The AutoIncrementer instance, used by the service to perform autoincrements on primary keys, can be switched out
 for your own by overriding the `CreateAutoIncrementer()` function on the service, so long as your new AutoIncrementer implements the `IAutoIncrementer<T>` interface.

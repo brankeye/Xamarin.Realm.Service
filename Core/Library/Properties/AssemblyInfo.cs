@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Xamarin.Realm Service")]
-[assembly: AssemblyDescription("A service layer for Xamarin.Realm that adds support for autoincrementing primary keys.")]
+[assembly: AssemblyDescription("XRS is a service layer for Xamarin.Realm that provides threadsafe AutoIncrement support for primary keys, as well as an improved and extended API for working with RealmObjects.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Brandon Keyes")]
 [assembly: AssemblyProduct("Xamarin.Realm Service")]

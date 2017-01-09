@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace xr.service.core.Library.Attributes
+namespace Xamarin.Realm.Service.Attributes
 {
     public class AutoIncrementAttribute : Attribute
     {

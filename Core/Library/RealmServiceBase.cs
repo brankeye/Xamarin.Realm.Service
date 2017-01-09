@@ -1,39 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Realms;
-using xr.service.core.Library.Interfaces;
+using Xamarin.Realm.Service.Interfaces;
 
-namespace xr.service.core.Library
+namespace Xamarin.Realm.Service
 {
     public abstract class RealmServiceBase<T> : IRealmService<T>
         where T : RealmObject
     {
         protected static IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
-        protected Realm RealmInstance => GetRealmInstance;
-        private Realm _realmInstance;
+        protected Realms.Realm RealmInstance => GetRealmInstance;
+        private Realms.Realm _realmInstance;
 
-        protected Func<Realm> RealmGetter { get; }
+        protected Func<Realms.Realm> RealmGetter { get; }
 
         protected RealmServiceBase()
         {
-            RealmGetter = () => Realm.GetInstance();
+            RealmGetter = () => Realms.Realm.GetInstance();
             InitializeInternal();
         }
 
         protected RealmServiceBase(RealmConfigurationBase config)
         {
-            RealmGetter = () => Realm.GetInstance(config);
+            RealmGetter = () => Realms.Realm.GetInstance(config);
             InitializeInternal();
         }
 
         protected RealmServiceBase(string databasePath)
         {
-            RealmGetter = () => Realm.GetInstance(databasePath);
+            RealmGetter = () => Realms.Realm.GetInstance(databasePath);
             InitializeInternal();
         }
 
@@ -58,7 +56,7 @@ namespace xr.service.core.Library
 
         protected abstract IAutoIncrementer<T> CreateAutoIncrementer();
 
-        protected virtual Realm GetRealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
+        protected virtual Realms.Realm GetRealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
 
         public abstract RealmConfigurationBase Config { get; }
 
@@ -106,7 +104,7 @@ namespace xr.service.core.Library
 
         public abstract bool Refresh();
 
-        public abstract bool IsSameInstance(Realm realm);
+        public abstract bool IsSameInstance(Realms.Realm realm);
 
         public abstract void Dispose();
     }

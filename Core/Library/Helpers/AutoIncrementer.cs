@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using xr.service.core.Library.Extensions;
-using xr.service.core.Library.Interfaces;
-using xr.service.core.Library.Utilities;
+using Xamarin.Realm.Service.Extensions;
+using Xamarin.Realm.Service.Interfaces;
+using Xamarin.Realm.Service.Utilities;
 
-namespace xr.service.core.Library.Helpers
+namespace Xamarin.Realm.Service.Helpers
 {
     public class AutoIncrementer<T> : IAutoIncrementer<T>
     {

@@ -8,7 +8,7 @@
     <ProjectGuid>{AEEA2F2D-7B82-4DAB-8FCB-2A0EDEB48A26}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>xr.service.core.Library</RootNamespace>
+    <RootNamespace>Xamarin.Realm.Service</RootNamespace>
     <AssemblyName>Xamarin.Realm Service</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>

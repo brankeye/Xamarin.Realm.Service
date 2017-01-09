@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace xr.service.core.Library.Extensions
+namespace Xamarin.Realm.Service.Extensions
 {
     public static class TypeIsIntegralExtension
     {

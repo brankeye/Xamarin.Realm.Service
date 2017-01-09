@@ -3,11 +3,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
-using xr.service.core.Library.Attributes;
-using xr.service.core.Library.Helpers;
-using xr.service.core.Library.Interfaces;
+using Xamarin.Realm.Service.Attributes;
+using Xamarin.Realm.Service.Helpers;
+using Xamarin.Realm.Service.Interfaces;
 
-namespace xr.service.core.Library
+namespace Xamarin.Realm.Service
 {
     public static class RealmService
     {
@@ -31,32 +31,32 @@ namespace xr.service.core.Library
 
         public static bool Compact(RealmConfigurationBase config = null)
         {
-            return Realm.Compact(config);
+            return Realms.Realm.Compact(config);
         }
 
         public static bool Compact(string databasePath)
         {
-            var realmInstance = Realm.GetInstance(databasePath);
-            return Realm.Compact(realmInstance.Config);
+            var realmInstance = Realms.Realm.GetInstance(databasePath);
+            return Realms.Realm.Compact(realmInstance.Config);
         }
 
         public static void Delete(RealmConfigurationBase config = null)
         {
             if (config != null)
             {
-                Realm.DeleteRealm(config);
+                Realms.Realm.DeleteRealm(config);
             }
             else
             {
-                var realmInstance = Realm.GetInstance();
-                Realm.DeleteRealm(realmInstance.Config);
+                var realmInstance = Realms.Realm.GetInstance();
+                Realms.Realm.DeleteRealm(realmInstance.Config);
             }
         }
 
         public static void Delete(string databasePath)
         {
-            var realmInstance = Realm.GetInstance(databasePath);
-            Realm.DeleteRealm(realmInstance.Config);
+            var realmInstance = Realms.Realm.GetInstance(databasePath);
+            Realms.Realm.DeleteRealm(realmInstance.Config);
         }
     }
 
@@ -220,7 +220,7 @@ namespace xr.service.core.Library
             return RealmInstance.Refresh();
         }
 
-        public override bool IsSameInstance(Realm realm)
+        public override bool IsSameInstance(Realms.Realm realm)
         {
             return RealmInstance.IsSameInstance(realm);
         }

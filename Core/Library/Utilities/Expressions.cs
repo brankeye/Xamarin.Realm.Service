@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace xr.service.core.Library.Utilities
+namespace Xamarin.Realm.Service.Utilities
 {
     public static class Expressions
     {

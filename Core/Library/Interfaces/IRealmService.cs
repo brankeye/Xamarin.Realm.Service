@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
 
-namespace xr.service.core.Library.Interfaces
+namespace Xamarin.Realm.Service.Interfaces
 {
     public interface IRealmService<T>
         where T : RealmObject
@@ -55,7 +55,7 @@ namespace xr.service.core.Library.Interfaces
 
         bool Refresh();
 
-        bool IsSameInstance(Realm realm);
+        bool IsSameInstance(Realms.Realm realm);
 
         void Dispose();
     }

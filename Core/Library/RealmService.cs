@@ -11,13 +11,7 @@ namespace Xamarin.Realm.Service
 {
     public static class RealmService
     {
-        public static IRealmService<T> GetInstance<T>()
-            where T : RealmObject
-        {
-            return RealmService<T>.GetInstance();
-        }
-
-        public static IRealmService<T> GetInstance<T>(RealmConfigurationBase config)
+        public static IRealmService<T> GetInstance<T>(RealmConfigurationBase config = null)
             where T : RealmObject
         {
             return RealmService<T>.GetInstance(config);
@@ -63,9 +57,7 @@ namespace Xamarin.Realm.Service
     public class RealmService<T> : RealmServiceBase<T>
         where T : RealmObject
     {
-        protected RealmService() { }
-
-        protected RealmService(RealmConfigurationBase config) : base(config) { }
+        protected RealmService(RealmConfigurationBase config = null) : base(config) { }
 
         protected RealmService(string databasePath) : base(databasePath) { }
 
@@ -80,17 +72,12 @@ namespace Xamarin.Realm.Service
             return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
         }
 
-        public static IRealmService<T> GetInstance()
-        {
-            return new RealmService<T>();
-        }
-
-        public static IRealmService<T> GetInstance(RealmConfigurationBase config)
+        internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
         {
             return new RealmService<T>(config);
         }
 
-        public static IRealmService<T> GetInstance(string databasePath)
+        internal static IRealmService<T> GetInstance(string databasePath)
         {
             return new RealmService<T>(databasePath);
         }

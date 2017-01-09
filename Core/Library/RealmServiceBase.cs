@@ -12,26 +12,17 @@ namespace Xamarin.Realm.Service
     {
         protected static IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
-        protected Realms.Realm RealmInstance => GetRealmInstance;
-        private Realms.Realm _realmInstance;
+        public Realms.Realm RealmInstance { get; }
 
-        protected Func<Realms.Realm> RealmGetter { get; }
-
-        protected RealmServiceBase()
+        protected RealmServiceBase(RealmConfigurationBase config = null)
         {
-            RealmGetter = () => Realms.Realm.GetInstance();
-            InitializeInternal();
-        }
-
-        protected RealmServiceBase(RealmConfigurationBase config)
-        {
-            RealmGetter = () => Realms.Realm.GetInstance(config);
+            RealmInstance = Realms.Realm.GetInstance(config);
             InitializeInternal();
         }
 
         protected RealmServiceBase(string databasePath)
         {
-            RealmGetter = () => Realms.Realm.GetInstance(databasePath);
+            RealmInstance = Realms.Realm.GetInstance(databasePath);
             InitializeInternal();
         }
 
@@ -55,8 +46,6 @@ namespace Xamarin.Realm.Service
         }
 
         protected abstract IAutoIncrementer<T> CreateAutoIncrementer();
-
-        protected virtual Realms.Realm GetRealmInstance => _realmInstance ?? (_realmInstance = RealmGetter.Invoke());
 
         public abstract RealmConfigurationBase Config { get; }
 

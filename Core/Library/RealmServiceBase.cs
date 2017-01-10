@@ -62,13 +62,13 @@ namespace Xamarin.Realm.Service
 
         public abstract Transaction BeginWrite();
         
-        public abstract void Add(T item);
+        public abstract T Add(T item);
 
-        public abstract void AddAll(IQueryable<T> list);
+        public abstract IQueryable<T> AddAll(IQueryable<T> list);
 
-        public abstract void AddOrUpdate(T item);
+        public abstract T AddOrUpdate(T item);
 
-        public abstract void AddOrUpdateAll(IQueryable<T> list);
+        public abstract IQueryable<T> AddOrUpdateAll(IQueryable<T> list);
 
         public abstract T Find(long? primaryKey);
 

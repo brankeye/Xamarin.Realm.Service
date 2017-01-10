@@ -125,43 +125,48 @@ namespace Xamarin.Realm.Service
             return RealmInstance.BeginWrite();
         }
 
-        public override void Add(T item)
+        public override T Add(T item)
         {
             if (IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
-            RealmInstance.Add(item);
+            var result = RealmInstance.Add(item, false);
             AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
+            return result;
         }
 
-        public override void AddAll(IQueryable<T> list)
+        public override IQueryable<T> AddAll(IQueryable<T> list)
         {
+            var result = new List<T>();
             foreach (var item in list)
             {
-                Add(item);
+                result.Add(Add(item));
             }
+            return result.AsQueryable();
         }
 
-        public override void AddOrUpdate(T item)
+        public override T AddOrUpdate(T item)
         {
             if (IsAutoIncrementEnabled)
             {
                 if (!AutoIncrementer.PrimaryKeyExists(item))
                 {
-                    
+                    AutoIncrementer.AutoIncrementPrimaryKey(item);
                 }
-                    AutoIncrementer?.AutoIncrementPrimaryKey(item);
             }
-            RealmInstance.Add(item, true);
+            var result = RealmInstance.Add(item, true);
             AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
+            return result;
         }
 
-        public override void AddOrUpdateAll(IQueryable<T> list)
+        public override IQueryable<T> AddOrUpdateAll(IQueryable<T> list)
         {
+            var result = new List<T>();
             foreach (var item in list)
             {
-                AddOrUpdate(item);
+                result.Add(AddOrUpdate(item));
             }
             AddOrUpdateCollectionOccurred?.Invoke(this, EventArgs.Empty);
+            return result.AsQueryable();
         }
 
         public override T Find(long? primaryKey)

@@ -11,12 +11,6 @@ namespace Xamarin.Realm.Service.Interfaces
     {
         Realms.Realm RealmInstance { get; }
 
-        RealmConfigurationBase Config { get; }
-
-        RealmSchema Schema { get; }
-
-        bool IsClosed { get; }
-
         void Write(Action action);
 
         Task WriteAsync(Action<RealmService<T>> action);
@@ -34,6 +28,10 @@ namespace Xamarin.Realm.Service.Interfaces
         T Find(long? primaryKey);
 
         T Find(string primaryKey);
+
+        IQueryable<T> FindAll(IQueryable<long?> primaryKeys);
+
+        IQueryable<T> FindAll(IQueryable<string> primaryKeys);
 
         T Get(Expression<Func<T, bool>> predicate);
 
@@ -53,8 +51,10 @@ namespace Xamarin.Realm.Service.Interfaces
 
         bool Refresh();
 
-        bool IsSameInstance(Realms.Realm realm);
+        bool IsSameRealmInstance(Realms.Realm realm);
 
-        void Dispose();
+        bool IsSameRealmInstance(IRealmService<T> realmService);
+
+        void DisposeRealmInstance();
     }
 }

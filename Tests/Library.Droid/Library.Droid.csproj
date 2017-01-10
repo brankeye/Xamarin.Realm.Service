@@ -115,7 +115,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\RealmHelper.cs" />
     <Compile Include="Interfaces\IRealmServiceTests.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Models\Animal.cs" />

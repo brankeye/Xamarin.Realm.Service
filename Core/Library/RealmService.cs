@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -168,9 +169,31 @@ namespace Xamarin.Realm.Service
             return RealmInstance.Find<T>(primaryKey);
         }
 
+        public override IQueryable<T> FindAll(IQueryable<long?> primaryKeys)
+        {
+            var list = new List<T>();
+            foreach (var pk in primaryKeys)
+            {
+                var item = Find(pk);
+                if(item != null) list.Add(item);
+            }
+            return list.AsQueryable();
+        }
+
         public override T Find(string primaryKey)
         {
             return RealmInstance.Find<T>(primaryKey);
+        }
+
+        public override IQueryable<T> FindAll(IQueryable<string> primaryKeys)
+        {
+            var list = new List<T>();
+            foreach (var pk in primaryKeys)
+            {
+                var item = Find(pk);
+                if (item != null) list.Add(item);
+            }
+            return list.AsQueryable();
         }
 
         public override T Get(Expression<Func<T, bool>> predicate)
@@ -225,12 +248,17 @@ namespace Xamarin.Realm.Service
             return RealmInstance.Refresh();
         }
 
-        public override bool IsSameInstance(Realms.Realm realm)
+        public override bool IsSameRealmInstance(Realms.Realm realm)
         {
             return RealmInstance.IsSameInstance(realm);
         }
 
-        public override void Dispose()
+        public override bool IsSameRealmInstance(IRealmService<T> realmService)
+        {
+            return RealmInstance.IsSameInstance(realmService.RealmInstance);
+        }
+
+        public override void DisposeRealmInstance()
         {
             RealmInstance.Dispose();
         }

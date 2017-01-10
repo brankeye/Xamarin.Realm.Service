@@ -1,5 +1,4 @@
 ﻿using Realms;
-using Xamarin.Realm.Service.Attributes;
 
 namespace Library.Droid.Models
 {

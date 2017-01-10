@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Realms;
 using Xamarin.Realm.Service.Interfaces;
@@ -93,8 +92,14 @@ namespace Xamarin.Realm.Service
 
         public abstract bool Refresh();
 
-        public abstract bool IsSameInstance(Realms.Realm realm);
+        public abstract bool IsSameRealmInstance(Realms.Realm realm);
 
-        public abstract void Dispose();
+        public abstract bool IsSameRealmInstance(IRealmService<T> realmService);
+
+        public abstract void DisposeRealmInstance();
+
+        public abstract IQueryable<T> FindAll(IQueryable<long?> primaryKey);
+
+        public abstract IQueryable<T> FindAll(IQueryable<string> primaryKey);
     }
 }

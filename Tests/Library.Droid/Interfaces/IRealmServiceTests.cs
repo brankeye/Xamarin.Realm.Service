@@ -1,6 +1,3 @@
-using System.Threading.Tasks;
-using NUnit.Framework;
-
 namespace Library.Droid.Interfaces
 {
     public interface IRealmServiceTests

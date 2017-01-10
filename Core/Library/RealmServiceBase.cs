@@ -74,6 +74,10 @@ namespace Xamarin.Realm.Service
 
         public abstract T Find(string primaryKey);
 
+        public abstract IQueryable<T> FindAll(IQueryable<long?> primaryKey);
+
+        public abstract IQueryable<T> FindAll(IQueryable<string> primaryKey);
+
         public abstract T Get(Expression<Func<T, bool>> predicate);
 
         public abstract IQueryable<T> GetAll();
@@ -97,9 +101,5 @@ namespace Xamarin.Realm.Service
         public abstract bool IsSameRealmInstance(IRealmService<T> other);
 
         public abstract void DisposeRealmInstance();
-
-        public abstract IQueryable<T> FindAll(IQueryable<long?> primaryKey);
-
-        public abstract IQueryable<T> FindAll(IQueryable<string> primaryKey);
     }
 }

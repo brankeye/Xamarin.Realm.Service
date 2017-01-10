@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using xr.service.samples.helloworld.Shared.Models;
 using xr.service.samples.helloworld.Shared.Services.Realm;
@@ -11,8 +13,8 @@ namespace xr.service.samples.helloworld.Shared
     {
         public App()
         {
-            //RunServiceTests();
-            RunAsyncServiceTests();
+            RunServiceTests();
+            //RunAsyncServiceTests();
 
             MainPage = new ContentPage();
         }

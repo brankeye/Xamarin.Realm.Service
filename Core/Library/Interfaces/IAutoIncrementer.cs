@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Xamarin.Realm.Service.Interfaces
 {
     public interface IAutoIncrementer<in T>
     {
+        PropertyInfo PrimaryKeyProperty { get; }
+
         bool IsAutoIncrementEnabled { get; }
 
         bool IsAutoIncrementConfigured { get; }

@@ -24,6 +24,36 @@ namespace Library.Droid.Tests
             var country1 = countriesService.Get(x => x.Name == "Canada");
             Assert.That(country1, Is.Not.Null);
 
+            // Primary Key, String
+            var paintingsService = RealmService.GetInstance<Models.Painting>();
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+                paintingsService.AddOrUpdate(new Painting { Id = "One", Name = "Gregory" });
+                paintingsService.AddOrUpdate(new Painting { Id = "Two", Name = "Bertha" });
+            });
+            var painting1 = paintingsService.Find("One");
+            var painting2 = paintingsService.Find("Two");
+            Assert.That(painting1, Is.Not.Null);
+            Assert.That(painting1.Id, Is.EqualTo("One"));
+            Assert.That(painting2, Is.Not.Null);
+            Assert.That(painting2.Id, Is.EqualTo("Two"));
+            paintingsService.Write(() =>
+            {
+                paintingsService.AddOrUpdate(new Painting { Id = "One", Name = "Jim" });
+                paintingsService.AddOrUpdate(new Painting { Id = "Two", Name = "Jones" });
+            });
+            painting1 = paintingsService.Find("One");
+            painting2 = paintingsService.Find("Two");
+            Assert.That(painting1, Is.Not.Null);
+            Assert.That(painting1.Name, Is.EqualTo("Jim"));
+            Assert.That(painting2, Is.Not.Null);
+            Assert.That(painting2.Name, Is.EqualTo("Jones"));
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+            });
+
             // Primary Key, AutoIncrement Disabled
             var animalsService = RealmService.GetInstance<Models.Animal>();
             animalsService.Write(() =>
@@ -89,6 +119,25 @@ namespace Library.Droid.Tests
                 countriesService.RemoveAll();
             });
 
+            // Primary Key, String
+            var paintingsService = RealmService.GetInstance<Models.Painting>();
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+                paintingsService.Add(new Painting { Id = "One", Name = "Gregory" });
+                paintingsService.Add(new Painting { Id = "Two", Name = "Bertha" });
+            });
+            var painting1 = paintingsService.Find("One");
+            var painting2 = paintingsService.Find("Two");
+            Assert.That(painting1, Is.Not.Null);
+            Assert.That(painting1.Id, Is.EqualTo("One"));
+            Assert.That(painting2, Is.Not.Null);
+            Assert.That(painting2.Id, Is.EqualTo("Two"));
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+            });
+
             // Primary Key, AutoIncrement Disabled
             var animalsService = RealmService.GetInstance<Models.Animal>();
             animalsService.Write(() =>
@@ -146,6 +195,32 @@ namespace Library.Droid.Tests
             });
             country1 = countriesService.Get(x => x.Name == "Canada");
             Assert.That(country1, Is.Null);
+
+            // Primary Key, String
+            var paintingsService = RealmService.GetInstance<Models.Painting>();
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+                paintingsService.AddOrUpdate(new Painting { Id = "One", Name = "Gregory" });
+                paintingsService.AddOrUpdate(new Painting { Id = "Two", Name = "Bertha" });
+            });
+            var painting1 = paintingsService.Find("One");
+            var painting2 = paintingsService.Find("Two");
+            Assert.That(painting1, Is.Not.Null);
+            Assert.That(painting2, Is.Not.Null);
+            paintingsService.Write(() =>
+            {
+                paintingsService.Remove("One");
+                paintingsService.Remove("Two");
+            });
+            painting1 = paintingsService.Find("One");
+            painting2 = paintingsService.Find("Two");
+            Assert.That(painting1, Is.Null);
+            Assert.That(painting2, Is.Null);
+            paintingsService.Write(() =>
+            {
+                paintingsService.RemoveAll();
+            });
 
             // Primary Key, AutoIncrement Disabled
             var animalsService = RealmService.GetInstance<Models.Animal>();

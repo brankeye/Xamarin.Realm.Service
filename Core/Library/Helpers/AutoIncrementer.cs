@@ -14,7 +14,7 @@ namespace Xamarin.Realm.Service.Helpers
 
         public bool IsAutoIncrementConfigured { get; protected set; }
         
-        protected PropertyInfo PrimaryKeyProperty { get; set; }
+        public PropertyInfo PrimaryKeyProperty { get; protected set; }
 
         private long _lastId;
 
@@ -39,7 +39,7 @@ namespace Xamarin.Realm.Service.Helpers
             if (IsAutoIncrementEnabled && IsAutoIncrementConfigured)
             {
                 var pk = PrimaryKeyProperty.GetValue(item);
-                return (long) Convert.ChangeType(pk, typeof(long));
+                return Convert.ToInt64(pk);
             }
             return null;
         }
@@ -47,7 +47,7 @@ namespace Xamarin.Realm.Service.Helpers
         public virtual bool PrimaryKeyExists(T item)
         {
             var pk = PrimaryKeyProperty.GetValue(item);
-            var pkLong = (long)Convert.ChangeType(pk, typeof(long));
+            var pkLong = Convert.ToInt64(pk);
             return pkLong > 0 && pkLong <= _lastId;
         }
 
@@ -88,7 +88,7 @@ namespace Xamarin.Realm.Service.Helpers
         {
             var primaryKeyGetter = Expressions.CreatePropertyGetter<T>(PrimaryKeyProperty);
             var item = getLargestPrimaryKeyQuery.Invoke(primaryKeyGetter);
-            if (item != null) _lastId = (long)Convert.ChangeType(PrimaryKeyProperty.GetValue(item), typeof(long));
+            if (item != null) _lastId = Convert.ToInt64(PrimaryKeyProperty.GetValue(item));
         }
 
         private long GetNextId()

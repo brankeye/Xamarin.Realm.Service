@@ -248,19 +248,19 @@ namespace Xamarin.Realm.Service
             RemoveCollectionOccurred?.Invoke(this, EventArgs.Empty);
         }
 
-        public override bool Refresh()
+        public override bool RefreshRealmInstance()
         {
             return RealmInstance.Refresh();
         }
 
-        public override bool IsSameRealmInstance(Realms.Realm realm)
+        public override bool IsSameRealmInstance(Realms.Realm other)
         {
-            return RealmInstance.IsSameInstance(realm);
+            return RealmInstance.IsSameInstance(other);
         }
 
-        public override bool IsSameRealmInstance(IRealmService<T> realmService)
+        public override bool IsSameRealmInstance(IRealmService<T> other)
         {
-            return RealmInstance.IsSameInstance(realmService.RealmInstance);
+            return RealmInstance.IsSameInstance(other.RealmInstance);
         }
 
         public override void DisposeRealmInstance()

@@ -90,11 +90,11 @@ namespace Xamarin.Realm.Service
 
         public abstract void RemoveAll(IQueryable<T> list);
 
-        public abstract bool Refresh();
+        public abstract bool RefreshRealmInstance();
 
-        public abstract bool IsSameRealmInstance(Realms.Realm realm);
+        public abstract bool IsSameRealmInstance(Realms.Realm other);
 
-        public abstract bool IsSameRealmInstance(IRealmService<T> realmService);
+        public abstract bool IsSameRealmInstance(IRealmService<T> other);
 
         public abstract void DisposeRealmInstance();
 

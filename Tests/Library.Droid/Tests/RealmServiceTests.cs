@@ -194,7 +194,7 @@ namespace Library.Droid.Tests
             var personsRealm = new PersonsRealmService();
             personsRealm.Write(() => personsRealm.RemoveAll());
             RunAsyncServiceTests().Wait();
-            personsRealm.Refresh();
+            personsRealm.RefreshRealmInstance();
             var sorted = personsRealm.GetAll().OrderBy(x => x.Id).ToList();
             Assert.That(sorted.Count, Is.EqualTo(50000));
             var firstId = sorted.First().Id;

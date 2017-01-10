@@ -116,16 +116,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\RealmHelper.cs" />
+    <Compile Include="Interfaces\IRealmServiceTests.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Models\Animal.cs" />
     <Compile Include="Models\Country.cs" />
+    <Compile Include="Models\Painting.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Realms\AnimalsRealmService.cs" />
     <Compile Include="Services\Realms\CountriesRealmService.cs" />
     <Compile Include="Services\Realms\PersonsRealmService.cs" />
-    <Compile Include="TestService.cs" />
+    <Compile Include="Tests\RealmServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

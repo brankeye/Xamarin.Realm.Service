@@ -9,6 +9,8 @@ namespace Xamarin.Realm.Service.Interfaces
     public interface IRealmService<T>
         where T : RealmObject
     {
+        Realms.Realm RealmInstance { get; }
+
         RealmConfigurationBase Config { get; }
 
         RealmSchema Schema { get; }
@@ -38,10 +40,6 @@ namespace Xamarin.Realm.Service.Interfaces
         IQueryable<T> GetAll();
 
         IQueryable<T> GetAll(Expression<Func<T, bool>> predicate);
-
-        IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate);
-
-        IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate);
 
         void Remove(long? primaryKey);
 

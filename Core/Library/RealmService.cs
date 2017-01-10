@@ -23,6 +23,12 @@ namespace Xamarin.Realm.Service
             return RealmService<T>.GetInstance(databasePath);
         }
 
+        public static void ConfigureAutoIncrement<T>()
+            where T : RealmObject
+        {
+            RealmService<T>.GetInstance();
+        }
+
         public static bool Compact(RealmConfigurationBase config = null)
         {
             return Realms.Realm.Compact(config);
@@ -57,6 +63,14 @@ namespace Xamarin.Realm.Service
     public class RealmService<T> : RealmServiceBase<T>
         where T : RealmObject
     {
+        public event EventHandler AddOrUpdateOccurred;
+
+        public event EventHandler AddOrUpdateCollectionOccurred;
+
+        public event EventHandler RemoveOccurred;
+
+        public event EventHandler RemoveCollectionOccurred;
+
         protected RealmService(RealmConfigurationBase config = null) : base(config) { }
 
         protected RealmService(string databasePath) : base(databasePath) { }
@@ -67,19 +81,19 @@ namespace Xamarin.Realm.Service
 
         public override bool IsClosed => RealmInstance.IsClosed;
 
-        protected override IAutoIncrementer<T> CreateAutoIncrementer()
-        {
-            return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
-        }
-
-        internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
+        protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
         {
             return new RealmService<T>(config);
         }
 
-        internal static IRealmService<T> GetInstance(string databasePath)
+        protected internal static IRealmService<T> GetInstance(string databasePath)
         {
             return new RealmService<T>(databasePath);
+        }
+
+        protected override IAutoIncrementer<T> CreateAutoIncrementer()
+        {
+            return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
         }
 
         public override void Write(Action action)
@@ -112,9 +126,10 @@ namespace Xamarin.Realm.Service
 
         public override void Add(T item)
         {
-            if (AutoIncrementer.IsAutoIncrementEnabled)
+            if (IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
             RealmInstance.Add(item);
+            AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void AddAll(IQueryable<T> list)
@@ -127,9 +142,16 @@ namespace Xamarin.Realm.Service
 
         public override void AddOrUpdate(T item)
         {
-            if (AutoIncrementer.IsAutoIncrementEnabled)
-                AutoIncrementer.AutoIncrementPrimaryKey(item);
+            if (IsAutoIncrementEnabled)
+            {
+                if (!AutoIncrementer.PrimaryKeyExists(item))
+                {
+                    
+                }
+                    AutoIncrementer?.AutoIncrementPrimaryKey(item);
+            }
             RealmInstance.Add(item, true);
+            AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void AddOrUpdateAll(IQueryable<T> list)
@@ -138,6 +160,7 @@ namespace Xamarin.Realm.Service
             {
                 AddOrUpdate(item);
             }
+            AddOrUpdateCollectionOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override T Find(long? primaryKey)
@@ -165,41 +188,36 @@ namespace Xamarin.Realm.Service
             return RealmInstance.All<T>().Where(predicate);
         }
 
-        public override IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate)
-        {
-            return RealmInstance.All<T>().OrderBy(orderPredicate);
-        }
-
-        public override IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate)
-        {
-            return RealmInstance.All<T>().Where(wherePredicate).OrderBy(orderPredicate);
-        }
-
         public override void Remove(long? primaryKey)
         {
             var item = Find(primaryKey);
             Remove(item);
+            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void Remove(string primaryKey)
         {
             var item = Find(primaryKey);
             Remove(item);
+            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void Remove(T item)
         {
             RealmInstance.Remove(item);
+            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void RemoveAll()
         {
             RealmInstance.RemoveAll<T>();
+            RemoveCollectionOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void RemoveAll(IQueryable<T> list)
         {
             RealmInstance.RemoveRange(list);
+            RemoveCollectionOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override bool Refresh()

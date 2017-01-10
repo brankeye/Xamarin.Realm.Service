@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Realms;
 using Xamarin.Realm.Service.Interfaces;
@@ -10,9 +11,11 @@ namespace Xamarin.Realm.Service
     public abstract class RealmServiceBase<T> : IRealmService<T>
         where T : RealmObject
     {
-        protected static IAutoIncrementer<T> AutoIncrementer { get; private set; }
-
         public Realms.Realm RealmInstance { get; }
+
+        protected bool IsAutoIncrementEnabled => AutoIncrementer != null && AutoIncrementer.IsAutoIncrementEnabled;
+
+        protected static IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
         protected RealmServiceBase(RealmConfigurationBase config = null)
         {
@@ -36,7 +39,8 @@ namespace Xamarin.Realm.Service
             if (AutoIncrementer == null)
             {
                 AutoIncrementer = CreateAutoIncrementer();
-                AutoIncrementer.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
+                if (!AutoIncrementer.IsAutoIncrementEnabled) AutoIncrementer = null;
+                AutoIncrementer?.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
             }
         }
 
@@ -58,7 +62,7 @@ namespace Xamarin.Realm.Service
         public abstract Task WriteAsync(Action<RealmService<T>> action);
 
         public abstract Transaction BeginWrite();
-
+        
         public abstract void Add(T item);
 
         public abstract void AddAll(IQueryable<T> list);
@@ -76,10 +80,6 @@ namespace Xamarin.Realm.Service
         public abstract IQueryable<T> GetAll();
 
         public abstract IQueryable<T> GetAll(Expression<Func<T, bool>> predicate);
-
-        public abstract IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate);
-
-        public abstract IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate);
 
         public abstract void Remove(long? primaryKey);
 

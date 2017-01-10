@@ -8,8 +8,12 @@ namespace Xamarin.Realm.Service.Interfaces
 
         bool IsAutoIncrementConfigured { get; }
 
+        long? GetPrimaryKey(T item);
+
+        bool PrimaryKeyExists(T item);
+
         bool AutoIncrementPrimaryKey(T item);
 
-        void ConfigureAutoIncrement(Func<Func<T, object>, T> getLargestPrimaryKeyQuery);
+        bool ConfigureAutoIncrement(Func<Func<T, object>, T> getLargestPrimaryKeyQuery);
     }
 }

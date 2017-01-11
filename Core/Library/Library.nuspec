@@ -12,6 +12,6 @@
     <description>XRS is a service layer for Xamarin.Realm that provides support for auto-incrementing primary keys, data-changing events, and an extensible API for manipulating data.</description>
     <releaseNotes>Initial release.</releaseNotes>
     <copyright>Copyright 2017</copyright>
-    <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Service Auto Id Autoincrement increment primary key service mobile database</tags>
+    <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Xamarin.Realm.Service XRS Service Auto Id Autoincrement increment primary key service mobile database</tags>
   </metadata>
 </package>

@@ -25,6 +25,8 @@ public class Person : RealmObject
 ```
 
 ### Using the service
+You must install Realm in your project alongside XRS. For Xamarin.Forms, XRS needs to be installed only in the shared project.
+
 Call `RealmService.GetInstance<T>()` to retrieve an `IRealmService<T>` instance.
 ```csharp
 var personsRealmService = RealmService.GetInstance<Models.Person>();

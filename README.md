@@ -1,9 +1,13 @@
-﻿# Xamarin.Realm Service (XRS)
-XRS is a service layer for Xamarin.Realm that provides threadsafe AutoIncrement support for primary keys, as well as an improved and extended API for working with RealmObjects.
+﻿# Xamarin.Realm.Service (XRS)
+XRS is a service layer for Xamarin.Realm that provides threadsafe auto-increment support for primary keys, data-changing events, as well as an improved and extended API for working with RealmObjects.
 
-NOTE: XRS may change as Xamarin.Realm development continues development toward Version 1.0.0.
+NOTE: XRS is in active development and may change as Xamarin.Realm continues development to version 1.0.0.
 
-## Nuget (coming)
+## Nuget
+XRS is available for download on Nuget.
+
+To install Xamarin.Realm.Service (XRS), run the following command in the Package Manager Console:
+		Install-Package Xamarin.Realm.Service
 
 ## Usage
 XRS is easy to use and works the same way under the hood as Xamarin.Realm.

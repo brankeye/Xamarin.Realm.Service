@@ -4,11 +4,11 @@ using System.Reflection;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xamarin.Realm Service")]
-[assembly: AssemblyDescription("A service layer for Xamarin.Realm that provides auto-incremented primary keys, data-changing events, and an extensible API for manipulating data.")]
+[assembly: AssemblyTitle("Xamarin.Realm.Service (XRS)")]
+[assembly: AssemblyDescription("XRS is a service layer for Xamarin.Realm that provides support for auto-incrementing primary keys, data-changing events, and an extensible API for manipulating data.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Brandon Keyes")]
-[assembly: AssemblyProduct("Xamarin.Realm Service")]
+[assembly: AssemblyProduct("Xamarin.Realm.Service (XRS)")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

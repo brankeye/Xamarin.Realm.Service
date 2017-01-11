@@ -15,6 +15,10 @@ namespace Xamarin.Realm.Service.Interfaces
     public interface IRealmService<T>
         where T : RealmObject
     {
+        event EventHandler AddOrUpdateCollectionOccurred;
+        event EventHandler RemoveCollectionOccurred;
+        event EventHandler WriteFinished;
+
         /// <summary>
         /// A Realm instance (also referred to as a Realm) represents a Realm database.
         /// </summary>
@@ -51,8 +55,11 @@ namespace Xamarin.Realm.Service.Interfaces
         /// <param name="action">
         /// Action to perform inside a <see cref="Transaction"/>, creating, updating, or removing objects.
         /// </param>
+        /// <param name="callback">
+        /// Action to perform after async write completes.
+        /// </param>
         /// <returns>An awaitable <see cref="Task"/>.</returns>
-        Task WriteAsync(Action<RealmService<T>> action);
+        Task WriteAsync(Action<RealmService<T>> action, Action callback = null);
 
         /// <summary>
         /// Factory for a write <see cref="Transaction"/>. Essential object to create scope for updates.

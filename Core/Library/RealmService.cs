@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
 using Xamarin.Realm.Service.Attributes;
+using Xamarin.Realm.Service.Events;
+using Xamarin.Realm.Service.Extensions;
 using Xamarin.Realm.Service.Helpers;
 using Xamarin.Realm.Service.Interfaces;
 
@@ -64,23 +67,25 @@ namespace Xamarin.Realm.Service
     public class RealmService<T> : RealmServiceBase<T>
         where T : RealmObject
     {
-        public event EventHandler AddOrUpdateOccurred;
+        internal static event EventHandler<RaiseEventArgs> RaiseEvent;
+        public override event EventHandler AddOrUpdateCollectionOccurred;
+        public override event EventHandler RemoveCollectionOccurred;
+        public override event EventHandler WriteFinished;
 
-        public event EventHandler AddOrUpdateCollectionOccurred;
+        protected RealmService(RealmConfigurationBase config = null) : base(config)
+        {
+            RaiseEvent += OnRaiseEvent;
+        }
 
-        public event EventHandler RemoveOccurred;
+        protected RealmService(string databasePath) : base(databasePath)
+        {
+            RaiseEvent += OnRaiseEvent;
+        }
 
-        public event EventHandler RemoveCollectionOccurred;
-
-        protected RealmService(RealmConfigurationBase config = null) : base(config) { }
-
-        protected RealmService(string databasePath) : base(databasePath) { }
-
-        public override RealmConfigurationBase Config => RealmInstance.Config;
-
-        public override RealmSchema Schema => RealmInstance.Schema;
-
-        public override bool IsClosed => RealmInstance.IsClosed;
+        private void OnRaiseEvent(object sender, RaiseEventArgs raiseEventArgs)
+        {
+            this.Raise(raiseEventArgs.EventName, raiseEventArgs.EventArgs);
+        }
 
         protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
         {
@@ -94,15 +99,18 @@ namespace Xamarin.Realm.Service
 
         protected override IAutoIncrementer<T> CreateAutoIncrementer()
         {
-            return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
+            //return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
+            if (AutoIncrementer<T>.Current == null) new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
+            return AutoIncrementer<T>.Current;
         }
 
         public override void Write(Action action)
         {
             RealmInstance.Write(action);
+            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(WriteFinished), EventArgs.Empty));
         }
 
-        public override Task WriteAsync(Action<RealmService<T>> action)
+        public override Task WriteAsync(Action<RealmService<T>> action, Action callback = null)
         {
             if (action == null)
             {
@@ -111,12 +119,16 @@ namespace Xamarin.Realm.Service
 
             return Task.Run(() =>
             {
-                var realmService = new RealmService<T>();
+                var realmService = new RealmService<T>(RealmInstance.Config);
                 using (var transaction = realmService.BeginWrite())
                 {
+                    //AttachEvents(realmService);
                     action(realmService);
                     transaction.Commit();
+                    //DetachEvents(realmService);
                 }
+                RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(WriteFinished), EventArgs.Empty));
+                callback?.BeginInvoke(callback.EndInvoke, null);
             });
         }
 
@@ -130,7 +142,7 @@ namespace Xamarin.Realm.Service
             if (IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
             var result = RealmInstance.Add(item, false);
-            AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
+            //RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateOccurred), EventArgs.Empty));
             return result;
         }
 
@@ -141,6 +153,7 @@ namespace Xamarin.Realm.Service
             {
                 result.Add(Add(item));
             }
+            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty));
             return result.AsQueryable();
         }
 
@@ -154,7 +167,6 @@ namespace Xamarin.Realm.Service
                 }
             }
             var result = RealmInstance.Add(item, true);
-            AddOrUpdateOccurred?.Invoke(this, EventArgs.Empty);
             return result;
         }
 
@@ -165,7 +177,7 @@ namespace Xamarin.Realm.Service
             {
                 result.Add(AddOrUpdate(item));
             }
-            AddOrUpdateCollectionOccurred?.Invoke(this, EventArgs.Empty);
+            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty));
             return result.AsQueryable();
         }
 
@@ -220,32 +232,29 @@ namespace Xamarin.Realm.Service
         {
             var item = Find(primaryKey);
             Remove(item);
-            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void Remove(string primaryKey)
         {
             var item = Find(primaryKey);
             Remove(item);
-            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void Remove(T item)
         {
             RealmInstance.Remove(item);
-            RemoveOccurred?.Invoke(this, EventArgs.Empty);
         }
 
         public override void RemoveAll()
         {
             RealmInstance.RemoveAll<T>();
-            RemoveCollectionOccurred?.Invoke(this, EventArgs.Empty);
+            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(RemoveCollectionOccurred), EventArgs.Empty));
         }
 
         public override void RemoveAll(IQueryable<T> list)
         {
             RealmInstance.RemoveRange(list);
-            RemoveCollectionOccurred?.Invoke(this, EventArgs.Empty);
+            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(RemoveCollectionOccurred), EventArgs.Empty));
         }
 
         public override bool RefreshRealmInstance()

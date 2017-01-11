@@ -9,7 +9,7 @@ using Xamarin.Realm.Service;
 namespace Library.Droid.Tests
 {
     [TestFixture]
-    public class RealmServiceTests : IRealmServiceTests
+    public class RealmServiceTests
     {
         [Test]
         public void AddOrUpdateTests()
@@ -156,7 +156,7 @@ namespace Library.Droid.Tests
             {
                 animalsService.RemoveAll();
             });
-            
+
             // Primary Key, AutoIncrement Enabled
             var personsService = RealmService.GetInstance<Models.Person>();
             personsService.Write(() =>
@@ -262,7 +262,7 @@ namespace Library.Droid.Tests
                 personsService.RemoveAll();
             });
         }
-        
+
         [Test]
         public void WriteAsyncTests()
         {
@@ -283,6 +283,7 @@ namespace Library.Droid.Tests
         public void WriteAsyncTimeTest()
         {
             // Got 8.79 secs, 9.19 secs, and 10.227 secs for 50000 small items added using autoincrementer.
+            // Higher now for some reason. Getting 13 secs.
             var personsRealm = new PersonsRealmService();
             personsRealm.Write(() => personsRealm.RemoveAll());
             RunAsyncServiceTests().Wait();

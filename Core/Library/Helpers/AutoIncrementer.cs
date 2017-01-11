@@ -10,6 +10,8 @@ namespace Xamarin.Realm.Service.Helpers
 {
     public class AutoIncrementer<T> : IAutoIncrementer<T>
     {
+        public static IAutoIncrementer<T> Current { get; private set; }
+
         public bool IsAutoIncrementEnabled { get; protected set; }
 
         public bool IsAutoIncrementConfigured { get; protected set; }
@@ -20,6 +22,7 @@ namespace Xamarin.Realm.Service.Helpers
 
         public AutoIncrementer(Type primaryKeyAttrType, Type autoIncrementAttrType)
         {
+            if(Current == null) Current = this;
             InitializeInternal(primaryKeyAttrType, autoIncrementAttrType);
         }
 

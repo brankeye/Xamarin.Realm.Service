@@ -145,7 +145,7 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="FodyWeavers.xml" />
+    <None Include="FodyWeavers.xml" />
     <Content Include="MainActivity.cs.txt" />
   </ItemGroup>
   <ItemGroup>

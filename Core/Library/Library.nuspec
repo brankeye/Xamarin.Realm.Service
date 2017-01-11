@@ -9,9 +9,9 @@
     <projectUrl>https://github.com/brankeye/Xamarin.Realm.Service</projectUrl>
     <iconUrl>http://i.imgur.com/vwSIBGc.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A service layer for Xamarin.Realm that provides auto-incremented primary keys, data-changing events, and an extended API for manipulating data.</description>
+    <description>A service layer for Xamarin.Realm that provides auto-incremented primary keys, data-changing events, and an extensible API for manipulating data.</description>
     <releaseNotes>Initial release.</releaseNotes>
     <copyright>Copyright 2017</copyright>
-    <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Service Auto Id Autoincrement increment primary key</tags>
+    <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Service Auto Id Autoincrement increment primary key service mobile database</tags>
   </metadata>
 </package>

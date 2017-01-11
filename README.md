@@ -3,6 +3,8 @@ XRS is a service layer for Xamarin.Realm that provides threadsafe AutoIncrement 
 
 NOTE: XRS may change as Xamarin.Realm development continues development toward Version 1.0.0.
 
+## Nuget (coming)
+
 ## Usage
 XRS is easy to use and works the same way under the hood as Xamarin.Realm.
 
@@ -26,9 +28,12 @@ var personsRealmServiceConfigured = RealmService.GetInstance<Models.Person>(real
 var personsRealmServiceByDB = RealmService.GetInstance<Models.Person>("path/to/database");
 ```
 
-Or subclass the RealmService for each model as follows. This also allows you to override specific functions in the service should they not fit your needs.
+Or subclass the RealmService for each ```RealmObject``` as follows. This also allows you to override specific functions in the service should they not fit your needs.
 ```csharp
-public class PersonsRealm : RealmService<Person> {}
+public class PersonsRealm : RealmService<Person> {
+	public PersonsRealm(RealmConfigurationBase config = null) 
+		: base(config) {}
+}
 ```
 
 ### Writing and so on
@@ -48,47 +53,59 @@ public void XRSTest() {
 }
 ```
 
+### Data-changing events
+XRS provides four events that are invoked on data-changing methods in the service.
+
+```WriteFinished``` is raised when ```Write``` or ```WriteAsync``` have finished.
+
+```AddOrUpdateCollectionOccurred``` is raised when ```AddAll``` or ```AddOrUpdateAll``` have finished.
+
+```RemoveCollectionOccurred``` is raised when ```RemoveAll``` has finished (both methods).
+
+
+
 ## API
 The API follows Xamarin.Realm as closely as possible, while taking the opportunity to improve on the naming of certain functions.
 For example, the `Add` function has been split into two distinct functions, `Add` and `AddOrUpdate`.
 
+You can override each method and add your own logic or events as you please.
+
 ```csharp
-public interface IRealmService<T>
-    where T : RealmObject
+public interface IRealmService<T> where T : RealmObject
 {
-	RealmConfigurationBase Config { get; }
+	event EventHandler AddOrUpdateCollectionOccurred;
+	event EventHandler RemoveCollectionOccurred;
+	event EventHandler WriteFinished;
 
-	RealmSchema Schema { get; }
-
-	bool IsClosed { get; }
+	Realms.Realm RealmInstance { get; }
 
 	void Write(Action action);
 
-	Task WriteAsync(Action<RealmService<T>> action);
+	Task WriteAsync(Action<RealmService<T>> action, Action callback = null);
 
 	Transaction BeginWrite();
 
-	void Add(T item);
+	T Add(T item);
 
-	void AddAll(IQueryable<T> list);
+	IQueryable<T> AddAll(IQueryable<T> list);
 
-	void AddOrUpdate(T item);
+	T AddOrUpdate(T item);
 
-	void AddOrUpdateAll(IQueryable<T> list);
+	IQueryable<T> AddOrUpdateAll(IQueryable<T> list);
 
 	T Find(long? primaryKey);
 
 	T Find(string primaryKey);
+
+	IQueryable<T> FindAll(IQueryable<long?> primaryKeys);
+
+	IQueryable<T> FindAll(IQueryable<string> primaryKeys);
 
 	T Get(Expression<Func<T, bool>> predicate);
 
 	IQueryable<T> GetAll();
 
 	IQueryable<T> GetAll(Expression<Func<T, bool>> predicate);
-
-	IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> orderPredicate);
-
-	IQueryable<T> GetAllOrdered(Expression<Func<T, bool>> wherePredicate, Expression<Func<T, bool>> orderPredicate);
 
 	void Remove(long? primaryKey);
 
@@ -100,12 +117,14 @@ public interface IRealmService<T>
 
 	void RemoveAll(IQueryable<T> list);
 
-	bool Refresh();
+	bool RefreshRealmInstance();
 
-	bool IsSameInstance(Realm realm);
-
-	void Dispose();
-    }
+	bool IsSameRealmInstance(Realms.Realm other);
+	
+	bool IsSameRealmInstance(IRealmService<T> other);
+	
+	void DisposeRealmInstance();
+}
 ```
 
 ## Extensibility
@@ -117,13 +136,16 @@ for your own by overriding the `CreateAutoIncrementer()` function on the service
 
 Have a look around the source code to see what can be changed.
 
-## Bugs/Suggestions
-Feel free to add new Issues for bugs, suggestions, API requests, etc.
+## Feedback/Bugs/Suggestions
+Feel free to add new issues for bugs, suggestions, API requests, etc. 
+
+Feedback is highly appreciated!
 
 ## Xamarin.Realm
 Realm Xamarin enables you to efficiently write your app’s model layer in a safe, persisted, and fast way.
-See the [docs](https://realm.io/docs/xamarin/latest/) to learn how Xamarin.Realm works.
-See the [changelog](https://github.com/realm/realm-dotnet/blob/master/CHANGELOG.md) to learn about recent updates.
-See their [repository](https://github.com/realm/realm-dotnet) on GitHub.
 
-## Nuget (coming)
+See the [docs](https://realm.io/docs/xamarin/latest/) to learn how Xamarin.Realm works.
+
+See the [changelog](https://github.com/realm/realm-dotnet/blob/master/CHANGELOG.md) to learn about recent updates.
+
+See their [repository](https://github.com/realm/realm-dotnet) on GitHub.

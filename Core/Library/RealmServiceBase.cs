@@ -10,11 +10,15 @@ namespace Xamarin.Realm.Service
     public abstract class RealmServiceBase<T> : IRealmService<T>
         where T : RealmObject
     {
+        public abstract event EventHandler AddOrUpdateCollectionOccurred;
+        public abstract event EventHandler RemoveCollectionOccurred;
+        public abstract event EventHandler WriteFinished;
+
         public Realms.Realm RealmInstance { get; }
 
-        protected bool IsAutoIncrementEnabled => AutoIncrementer != null && AutoIncrementer.IsAutoIncrementEnabled;
+        protected bool IsAutoIncrementEnabled { get; private set; }
 
-        protected static IAutoIncrementer<T> AutoIncrementer { get; private set; }
+        protected IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
         protected RealmServiceBase(RealmConfigurationBase config = null)
         {
@@ -35,12 +39,18 @@ namespace Xamarin.Realm.Service
 
         protected virtual void Initialize()
         {
+            ConfigureAutoIncrement();
+        }
+
+        protected virtual void ConfigureAutoIncrement()
+        {
             if (AutoIncrementer == null)
             {
                 AutoIncrementer = CreateAutoIncrementer();
                 if (!AutoIncrementer.IsAutoIncrementEnabled) AutoIncrementer = null;
                 AutoIncrementer?.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
             }
+            IsAutoIncrementEnabled = AutoIncrementer != null && AutoIncrementer.IsAutoIncrementEnabled;
         }
 
         protected virtual T GetLargestPrimaryKeyQuery(Func<T, object> pkGetter)
@@ -50,15 +60,9 @@ namespace Xamarin.Realm.Service
 
         protected abstract IAutoIncrementer<T> CreateAutoIncrementer();
 
-        public abstract RealmConfigurationBase Config { get; }
-
-        public abstract RealmSchema Schema { get; }
-
-        public abstract bool IsClosed { get; }
-
         public abstract void Write(Action action);
 
-        public abstract Task WriteAsync(Action<RealmService<T>> action);
+        public abstract Task WriteAsync(Action<RealmService<T>> action, Action callback = null);
 
         public abstract Transaction BeginWrite();
         

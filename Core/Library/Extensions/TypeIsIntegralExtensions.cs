@@ -2,7 +2,7 @@
 
 namespace Xamarin.Realm.Service.Extensions
 {
-    public static class TypeIsIntegralExtension
+    public static class TypeIsIntegralExtensions
     {
         public static bool IsIntegral(this Type type)
         {

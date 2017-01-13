@@ -13,7 +13,7 @@ using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
 {
-    public static class RealmService
+    public class RealmService
     {
         public static IRealmService<T> GetInstance<T>(RealmConfigurationBase config = null)
             where T : RealmObject
@@ -72,6 +72,8 @@ namespace Xamarin.Realm.Service
         public override event EventHandler RemoveCollectionOccurred;
         public override event EventHandler WriteFinished;
 
+        internal RealmService() { }
+
         protected RealmService(RealmConfigurationBase config = null) : base(config)
         {
             RaiseEvent += OnRaiseEvent;
@@ -89,19 +91,29 @@ namespace Xamarin.Realm.Service
 
         protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
         {
-            return new RealmService<T>(config);
+            var realmService = new RealmService<T>().CreateRealmService(config);
+            return realmService;
         }
 
         protected internal static IRealmService<T> GetInstance(string databasePath)
+        {
+            var realmService = new RealmService<T>().CreateRealmService(databasePath);
+            return realmService;
+        }
+
+        protected override IRealmService<T> CreateRealmService(RealmConfigurationBase config = null)
+        {
+            return new RealmService<T>(config);
+        }
+
+        protected override IRealmService<T> CreateRealmService(string databasePath)
         {
             return new RealmService<T>(databasePath);
         }
 
         protected override IAutoIncrementer<T> CreateAutoIncrementer()
         {
-            //return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
-            if (AutoIncrementer<T>.Current == null) new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
-            return AutoIncrementer<T>.Current;
+            return AutoIncrementer<T>.GetInstance(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
         }
 
         public override void Write(Action action)

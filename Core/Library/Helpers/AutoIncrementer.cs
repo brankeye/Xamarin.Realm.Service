@@ -20,10 +20,14 @@ namespace Xamarin.Realm.Service.Helpers
 
         private long _lastId;
 
-        public AutoIncrementer(Type primaryKeyAttrType, Type autoIncrementAttrType)
+        protected AutoIncrementer(Type primaryKeyAttrType, Type autoIncrementAttrType)
         {
-            if(Current == null) Current = this;
             InitializeInternal(primaryKeyAttrType, autoIncrementAttrType);
+        }
+
+        public static IAutoIncrementer<T> GetInstance(Type primaryKeyAttrType, Type autoIncrementAttrType)
+        {
+            return Current ?? (Current = new AutoIncrementer<T>(primaryKeyAttrType, autoIncrementAttrType));
         }
 
         private void InitializeInternal(Type primaryKeyAttrType, Type autoIncrementAttrType)

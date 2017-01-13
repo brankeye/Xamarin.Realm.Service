@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
+using Xamarin.Realm.Service.Helpers;
 using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
@@ -19,6 +20,8 @@ namespace Xamarin.Realm.Service
         protected bool IsAutoIncrementEnabled { get; private set; }
 
         protected IAutoIncrementer<T> AutoIncrementer { get; private set; }
+
+        internal RealmServiceBase() { }
 
         protected RealmServiceBase(RealmConfigurationBase config = null)
         {
@@ -57,6 +60,10 @@ namespace Xamarin.Realm.Service
         {
             return RealmInstance.All<T>().OrderByDescending(pkGetter).FirstOrDefault();
         }
+
+        protected abstract IRealmService<T> CreateRealmService(RealmConfigurationBase config = null);
+
+        protected abstract IRealmService<T> CreateRealmService(string databasePath);
 
         protected abstract IAutoIncrementer<T> CreateAutoIncrementer();
 

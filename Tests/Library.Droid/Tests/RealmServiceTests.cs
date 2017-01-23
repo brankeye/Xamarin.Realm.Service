@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Library.Droid.Interfaces;
 using Library.Droid.Models;
 using Library.Droid.Services.Realms;
 using NUnit.Framework;

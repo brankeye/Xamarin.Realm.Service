@@ -60,7 +60,7 @@ public void XRSTest() {
 ```
 
 ### Data-changing events
-XRS provides four events that are invoked on data-changing methods in the service.
+XRS provides three events that are invoked on all threads for data-changing methods in the service.
 
 ```WriteFinished``` is raised when ```Write``` or ```WriteAsync``` have finished.
 

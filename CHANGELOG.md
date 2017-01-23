@@ -1,5 +1,11 @@
-0.2.0 (TBD)
+0.1.5 (TBD)
 -------------------
+
+0.1.4 (2017-01-23)
+-------------------
+- Compatible with Realm version 0.82.0.
+- AutoIncrementer is now a single instance.
+- Implemented IDisposable on RealmServiceBase and derived class.
 
 0.1.3 (2017-11-01)
 -------------------

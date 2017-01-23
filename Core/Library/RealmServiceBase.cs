@@ -8,20 +8,20 @@ using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
 {
-    public abstract class RealmServiceBase<T> : IRealmService<T>
+    public abstract class RealmServiceBase<T> : IRealmService<T>, IDisposable
         where T : RealmObject
     {
         public abstract event EventHandler AddOrUpdateCollectionOccurred;
         public abstract event EventHandler RemoveCollectionOccurred;
         public abstract event EventHandler WriteFinished;
 
-        public Realms.Realm RealmInstance { get; }
+        public Realms.Realm RealmInstance { get; private set; }
 
         protected bool IsAutoIncrementEnabled { get; private set; }
 
         protected IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
-        internal RealmServiceBase() { }
+        private bool _disposed;
 
         protected RealmServiceBase(RealmConfigurationBase config = null)
         {
@@ -33,6 +33,30 @@ namespace Xamarin.Realm.Service
         {
             RealmInstance = Realms.Realm.GetInstance(databasePath);
             InitializeInternal();
+        }
+
+        ~RealmServiceBase()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    RealmInstance = null;
+                    AutoIncrementer = null;
+                }
+            }
+            _disposed = true;
         }
 
         private void InitializeInternal()
@@ -49,7 +73,7 @@ namespace Xamarin.Realm.Service
         {
             if (AutoIncrementer == null)
             {
-                AutoIncrementer = CreateAutoIncrementer();
+                AutoIncrementer = AutoIncrementer<T>.Current ?? (AutoIncrementer<T>.Current = CreateAutoIncrementer());
                 if (!AutoIncrementer.IsAutoIncrementEnabled) AutoIncrementer = null;
                 AutoIncrementer?.ConfigureAutoIncrement(GetLargestPrimaryKeyQuery);
             }
@@ -60,10 +84,6 @@ namespace Xamarin.Realm.Service
         {
             return RealmInstance.All<T>().OrderByDescending(pkGetter).FirstOrDefault();
         }
-
-        protected abstract IRealmService<T> CreateRealmService(RealmConfigurationBase config = null);
-
-        protected abstract IRealmService<T> CreateRealmService(string databasePath);
 
         protected abstract IAutoIncrementer<T> CreateAutoIncrementer();
 

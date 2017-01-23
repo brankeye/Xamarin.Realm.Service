@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using xr.service.samples.helloworld.Shared.Models;
 using xr.service.samples.helloworld.Shared.Services.Realm;

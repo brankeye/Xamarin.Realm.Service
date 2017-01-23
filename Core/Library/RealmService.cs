@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -64,7 +63,7 @@ namespace Xamarin.Realm.Service
         }
     }
 
-    public class RealmService<T> : RealmServiceBase<T>
+    public class RealmService<T> : RealmServiceBase<T>, IEventRaiser
         where T : RealmObject
     {
         internal static event EventHandler<RaiseEventArgs> RaiseEvent;
@@ -72,7 +71,7 @@ namespace Xamarin.Realm.Service
         public override event EventHandler RemoveCollectionOccurred;
         public override event EventHandler WriteFinished;
 
-        internal RealmService() { }
+        private bool _disposed;
 
         protected RealmService(RealmConfigurationBase config = null) : base(config)
         {
@@ -84,6 +83,27 @@ namespace Xamarin.Realm.Service
             RaiseEvent += OnRaiseEvent;
         }
 
+        ~RealmService()
+        {
+            Dispose(false);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    AddOrUpdateCollectionOccurred = null;
+                    RemoveCollectionOccurred = null;
+                    WriteFinished = null;
+                }
+                RaiseEvent -= OnRaiseEvent;
+            }
+            _disposed = true;
+            base.Dispose(disposing);
+        }
+
         private void OnRaiseEvent(object sender, RaiseEventArgs raiseEventArgs)
         {
             this.Raise(raiseEventArgs.EventName, raiseEventArgs.EventArgs);
@@ -91,29 +111,17 @@ namespace Xamarin.Realm.Service
 
         protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
         {
-            var realmService = new RealmService<T>().CreateRealmService(config);
-            return realmService;
-        }
-
-        protected internal static IRealmService<T> GetInstance(string databasePath)
-        {
-            var realmService = new RealmService<T>().CreateRealmService(databasePath);
-            return realmService;
-        }
-
-        protected override IRealmService<T> CreateRealmService(RealmConfigurationBase config = null)
-        {
             return new RealmService<T>(config);
         }
 
-        protected override IRealmService<T> CreateRealmService(string databasePath)
+        protected internal static IRealmService<T> GetInstance(string databasePath)
         {
             return new RealmService<T>(databasePath);
         }
 
         protected override IAutoIncrementer<T> CreateAutoIncrementer()
         {
-            return AutoIncrementer<T>.GetInstance(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
+            return new AutoIncrementer<T>(typeof(PrimaryKeyAttribute), typeof(AutoIncrementAttribute));
         }
 
         public override void Write(Action action)
@@ -134,10 +142,8 @@ namespace Xamarin.Realm.Service
                 var realmService = new RealmService<T>(RealmInstance.Config);
                 using (var transaction = realmService.BeginWrite())
                 {
-                    //AttachEvents(realmService);
                     action(realmService);
                     transaction.Commit();
-                    //DetachEvents(realmService);
                 }
                 RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(WriteFinished), EventArgs.Empty));
                 callback?.BeginInvoke(callback.EndInvoke, null);
@@ -153,8 +159,7 @@ namespace Xamarin.Realm.Service
         {
             if (IsAutoIncrementEnabled)
                 AutoIncrementer.AutoIncrementPrimaryKey(item);
-            var result = RealmInstance.Add(item, false);
-            //RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateOccurred), EventArgs.Empty));
+            var result = RealmInstance.Add(item);
             return result;
         }
 

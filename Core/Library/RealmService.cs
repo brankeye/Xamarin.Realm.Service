@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
 using Xamarin.Realm.Service.Attributes;
+using Xamarin.Realm.Service.Components;
 using Xamarin.Realm.Service.Events;
 using Xamarin.Realm.Service.Extensions;
-using Xamarin.Realm.Service.Helpers;
 using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
@@ -66,26 +66,35 @@ namespace Xamarin.Realm.Service
     public class RealmService<T> : RealmServiceBase<T>, IEventRaiser
         where T : RealmObject
     {
-        internal static event EventHandler<RaiseEventArgs> RaiseEvent;
         public override event EventHandler AddOrUpdateCollectionOccurred;
         public override event EventHandler RemoveCollectionOccurred;
         public override event EventHandler WriteFinished;
 
         private bool _disposed;
 
-        protected RealmService(RealmConfigurationBase config = null) : base(config)
-        {
-            RaiseEvent += OnRaiseEvent;
-        }
+        protected IEventAggregator<RealmService<T>> EventAggregator { get; set; }
 
-        protected RealmService(string databasePath) : base(databasePath)
+        protected RealmService(RealmConfigurationBase config = null) : base(config) { }
+
+        protected RealmService(string databasePath) : base(databasePath) { }
+
+        protected override void Initialize()
         {
-            RaiseEvent += OnRaiseEvent;
+            base.Initialize();
+            EventAggregator = CreateEventAggregator();
+            EventAggregator.AddEvent(nameof(WriteFinished));
+            EventAggregator.AddEvent(nameof(RemoveCollectionOccurred));
+            EventAggregator.AddEvent(nameof(AddOrUpdateCollectionOccurred));
         }
 
         ~RealmService()
         {
             Dispose(false);
+        }
+
+        protected virtual IEventAggregator<RealmService<T>> CreateEventAggregator()
+        {
+            return new EventAggregator<RealmService<T>>(this);
         }
 
         protected override void Dispose(bool disposing)
@@ -97,16 +106,12 @@ namespace Xamarin.Realm.Service
                     AddOrUpdateCollectionOccurred = null;
                     RemoveCollectionOccurred = null;
                     WriteFinished = null;
+                    (EventAggregator as IDisposable)?.Dispose();
+                    EventAggregator = null;
                 }
-                RaiseEvent -= OnRaiseEvent;
             }
             _disposed = true;
             base.Dispose(disposing);
-        }
-
-        private void OnRaiseEvent(object sender, RaiseEventArgs raiseEventArgs)
-        {
-            this.Raise(raiseEventArgs.EventName, raiseEventArgs.EventArgs);
         }
 
         protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)
@@ -127,7 +132,7 @@ namespace Xamarin.Realm.Service
         public override void Write(Action action)
         {
             RealmInstance.Write(action);
-            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(WriteFinished), EventArgs.Empty));
+            EventAggregator.Raise(nameof(WriteFinished), EventArgs.Empty);
         }
 
         public override Task WriteAsync(Action<RealmService<T>> action, Action callback = null)
@@ -145,7 +150,7 @@ namespace Xamarin.Realm.Service
                     action(realmService);
                     transaction.Commit();
                 }
-                RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(WriteFinished), EventArgs.Empty));
+                EventAggregator.Raise(nameof(WriteFinished), EventArgs.Empty);
                 callback?.BeginInvoke(callback.EndInvoke, null);
             });
         }
@@ -170,7 +175,7 @@ namespace Xamarin.Realm.Service
             {
                 result.Add(Add(item));
             }
-            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty));
+            EventAggregator.Raise(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty);
             return result.AsQueryable();
         }
 
@@ -194,7 +199,7 @@ namespace Xamarin.Realm.Service
             {
                 result.Add(AddOrUpdate(item));
             }
-            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty));
+            EventAggregator.Raise(nameof(AddOrUpdateCollectionOccurred), EventArgs.Empty);
             return result.AsQueryable();
         }
 
@@ -265,13 +270,13 @@ namespace Xamarin.Realm.Service
         public override void RemoveAll()
         {
             RealmInstance.RemoveAll<T>();
-            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(RemoveCollectionOccurred), EventArgs.Empty));
+            EventAggregator.Raise(nameof(RemoveCollectionOccurred), EventArgs.Empty);
         }
 
         public override void RemoveAll(IQueryable<T> list)
         {
             RealmInstance.RemoveRange(list);
-            RaiseEvent?.Invoke(this, new RaiseEventArgs(nameof(RemoveCollectionOccurred), EventArgs.Empty));
+            EventAggregator.Raise(nameof(RemoveCollectionOccurred), EventArgs.Empty);
         }
 
         public override bool RefreshRealmInstance()

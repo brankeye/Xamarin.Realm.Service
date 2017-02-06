@@ -10,26 +10,12 @@
     <iconUrl>http://i.imgur.com/vwSIBGc.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>XRS is a service layer for Xamarin.Realm that provides threadsafe auto-increment support for primary keys, data-changing events, as well as an improved and extended API for working with RealmObjects.</description>
-    <releaseNotes>Support for Realm version 0.82.0 and internal improvements to resource management.</releaseNotes>
+    <releaseNotes>Improvements to event aggregation within RealmService derived class :)</releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Xamarin.Realm.Service XRS Service Auto Id Autoincrement increment primary key service mobile database</tags>
 	
 	<dependencies>
 		<dependency id="Realm" version="0.82.0" />
-		<dependency id="Fody" version="1.29.4" />
-		<dependency id="DotNetCross.Memory.Unsafe" version="0.2.2" />
-		<dependency id="Remotion.Linq" version="2.1.1" />
-		<dependency id="System.Collections" version="4.3.0" />
-		<dependency id="System.Diagnostics.Debug" version="4.3.0" />
-		<dependency id="System.Linq" version="4.3.0" />
-		<dependency id="System.Linq.Expressions" version="4.3.0" />
-		<dependency id="System.Linq.Queryable" version="4.3.0" />
-		<dependency id="System.ObjectModel" version="4.3.0" />
-		<dependency id="System.Reflection" version="4.3.0" />
-		<dependency id="System.Reflection.Extensions" version="4.3.0" />
-		<dependency id="System.Runtime" version="4.3.0" />
-		<dependency id="System.Runtime.Extensions" version="4.3.0" />
-		<dependency id="System.Threading" version="4.3.0" />
 	</dependencies>
   </metadata>
 </package>

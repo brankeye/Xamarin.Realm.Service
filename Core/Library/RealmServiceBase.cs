@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Realms;
-using Xamarin.Realm.Service.Helpers;
+using Xamarin.Realm.Service.Components;
 using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service

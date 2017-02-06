@@ -11,10 +11,40 @@ namespace xr.service.samples.helloworld.Shared
     {
         public App()
         {
-            RunServiceTests();
+            RunEventTests();
             //RunAsyncServiceTests();
 
             MainPage = new ContentPage();
+        }
+
+        protected void RunEventTests()
+        {
+            var realmService = RealmService.GetInstance<Models.Person>();
+            var realmServiceTwo = RealmService.GetInstance<Models.Person>();
+
+            realmService.WriteFinished += (sender, args) =>
+            {
+                var msg = "Woohoo!";
+            };
+
+            realmServiceTwo.WriteFinished += (sender, args) =>
+            {
+                var msg = "Woohoo!";
+            };
+
+            realmService.Write(() =>
+            {
+                realmService.Add(new Person { Name = "Greg" });
+                realmService.Add(new Person { Name = "Jim" });
+                realmService.Add(new Person { Name = "Bob" });
+            });
+
+            realmServiceTwo.Write(() =>
+            {
+                realmService.Add(new Person { Name = "Greg" });
+                realmService.Add(new Person { Name = "Jim" });
+                realmService.Add(new Person { Name = "Bob" });
+            });
         }
 
         protected void RunServiceTests()

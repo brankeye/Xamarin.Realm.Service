@@ -6,7 +6,7 @@ using Xamarin.Realm.Service.Extensions;
 using Xamarin.Realm.Service.Interfaces;
 using Xamarin.Realm.Service.Utilities;
 
-namespace Xamarin.Realm.Service.Helpers
+namespace Xamarin.Realm.Service.Components
 {
     public class AutoIncrementer<T> : IAutoIncrementer<T>
     {

@@ -7,7 +7,8 @@ NOTE: XRS is in active development and may change as Xamarin.Realm continues dev
 XRS is available for [download on Nuget](https://www.nuget.org/packages/Xamarin.Realm.Service/).
 
 To install Xamarin.Realm.Service (XRS), run the following command in the Package Manager Console:
-		Install-Package Xamarin.Realm.Service
+	
+	Install-Package Xamarin.Realm.Service
 
 ## Usage
 XRS is easy to use and works the same way under the hood as Xamarin.Realm.

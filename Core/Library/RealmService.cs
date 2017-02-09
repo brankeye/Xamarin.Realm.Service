@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Realms;
 using Xamarin.Realm.Service.Attributes;
 using Xamarin.Realm.Service.Components;
-using Xamarin.Realm.Service.Events;
-using Xamarin.Realm.Service.Extensions;
 using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
@@ -70,8 +68,6 @@ namespace Xamarin.Realm.Service
         public override event EventHandler RemoveCollectionOccurred;
         public override event EventHandler WriteFinished;
 
-        private bool _disposed;
-
         protected IEventAggregator<RealmService<T>> EventAggregator { get; set; }
 
         protected RealmService(RealmConfigurationBase config = null) : base(config) { }
@@ -81,32 +77,14 @@ namespace Xamarin.Realm.Service
         protected override void Initialize()
         {
             base.Initialize();
-            EventAggregator = CreateEventAggregator();
-            EventAggregator.AddEvent(nameof(WriteFinished));
-            EventAggregator.AddEvent(nameof(RemoveCollectionOccurred));
-            EventAggregator.AddEvent(nameof(AddOrUpdateCollectionOccurred));
+            EventAggregator = EventAggregator<RealmService<T>>.Current ?? 
+                             (EventAggregator<RealmService<T>>.Current = CreateEventAggregator());
+            EventAggregator.AddTarget(this);
         }
 
         protected virtual IEventAggregator<RealmService<T>> CreateEventAggregator()
         {
-            return new EventAggregator<RealmService<T>>(this);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    AddOrUpdateCollectionOccurred = null;
-                    RemoveCollectionOccurred = null;
-                    WriteFinished = null;
-                    (EventAggregator as IDisposable)?.Dispose();
-                    EventAggregator = null;
-                }
-            }
-            _disposed = true;
-            base.Dispose(disposing);
+            return new EventAggregator<RealmService<T>>();
         }
 
         protected internal static IRealmService<T> GetInstance(RealmConfigurationBase config = null)

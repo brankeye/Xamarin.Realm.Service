@@ -1,5 +1,8 @@
-0.1.6 (TBD)
+0.1.6 (2017-02-09)
 -------------------
+- Removed IDisposable implementations (no need for them).
+- Improved EventAggregator implementation by removing internal static event in favor of weak references to target objects.
+- Write speeds have been doubly improved as a result of these changes.
 
 0.1.5 (2017-02-06)
 -------------------

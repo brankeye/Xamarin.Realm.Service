@@ -9,8 +9,14 @@
     <projectUrl>https://github.com/brankeye/Xamarin.Realm.Service</projectUrl>
     <iconUrl>http://i.imgur.com/vwSIBGc.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>XRS is a service layer for Xamarin.Realm that provides threadsafe auto-increment support for primary keys, data-changing events, as well as an improved and extended API for working with RealmObjects.</description>
-    <releaseNotes>Improvements to event aggregation within RealmService derived class :)</releaseNotes>
+    <description>XRS is a service layer for Xamarin.Realm that provides threadsafe auto-increment support for primary keys, data-changing events, and an extensible API for working with RealmObjects.</description>
+    <releaseNotes>
+	0.1.6 (2017-02-09)
+	-------------------
+	- Removed IDisposable implementations (no need for them).
+	- Improved EventAggregator implementation by removing internal static event in favor of weak references to target objects.
+	- Write speeds have been doubly improved as a result of these changes.
+	</releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>Xamarin Forms Xamarin.Forms Realm Xamarin.Realm Xamarin.Realm.Service XRS Service Auto Id Autoincrement increment primary key service mobile database</tags>
 	

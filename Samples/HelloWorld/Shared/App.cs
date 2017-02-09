@@ -6,12 +6,13 @@ using xr.service.samples.helloworld.Shared.Services.Realm;
 using Xamarin.Forms;
 using Xamarin.Realm.Service;
 using Xamarin.Realm.Service.Components;
-using Xamarin.Realm.Service.Interfaces;
 
 namespace xr.service.samples.helloworld.Shared
 {
     public class App : Application
     {
+        //protected WeakReference service, aggregator;
+
         public App()
         {
             RunEventTests();
@@ -139,11 +140,23 @@ namespace xr.service.samples.helloworld.Shared
         protected override void OnStart()
         {
             // Handle when your app starts
+            //var realmService = new PersonsRealmService();
+            //service = new WeakReference(realmService);
+            //realmService = null;
+
+            //var agg = new EventAggregator<PersonsRealmService>();
+            //aggregator = new WeakReference(agg);
+            //agg = null;
+
+            //GC.Collect();
         }
 
         protected override void OnSleep()
         {
             // Handle when your app sleeps
+            //GC.Collect();
+            //var serviceIsAlive = service.IsAlive;
+            //var aggIsAlive = aggregator.IsAlive;
         }
 
         protected override void OnResume()

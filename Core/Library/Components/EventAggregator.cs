@@ -1,99 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Xamarin.Realm.Service.Events;
 using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service.Components
 {
-    public class EventAggregator<T> : IEventAggregator<T>, IDisposable
+    public class EventAggregator<T> : IEventAggregator<T>
         where T : IEventRaiser
     {
-        protected IDictionary<string, FieldInfo> Fields => FieldDictionary<T>.Current.Fields;
+        public static IEventAggregator<T> Current { get; internal set; }
 
-        protected static event EventHandler<RaiseEventArgs> RaiseEvent;
+        private IDictionary<string, FieldInfo> Fields { get; } = new Dictionary<string, FieldInfo>();
 
-        private bool _disposed;
+        private IList<WeakReference> Sources { get; } = new List<WeakReference>();
 
-        private WeakReference Source { get; }
-
-        public EventAggregator(T source)
+        public EventAggregator()
         {
-            Source = new WeakReference(source);
-            RaiseEvent -= OnRaiseEvent;
-            RaiseEvent += OnRaiseEvent;
+            RemoveDeadSources();
+            AddEventsInternal();
         }
 
-        private void OnRaiseEvent(object sender, RaiseEventArgs raiseEventArgs)
+        public virtual void AddTarget(object target)
         {
-            RaiseEvents(raiseEventArgs.EventName, raiseEventArgs.EventArgs);
+            Sources.Add(new WeakReference(target));
         }
 
         public void Raise<TArgs>(string eventName, TArgs eventArgs)
             where TArgs : EventArgs
         {
-            RaiseEvent?.Invoke(Source.Target, new RaiseEventArgs(eventName, eventArgs));
-        }
-
-        public void AddEvent(string eventName)
-        {
-            if (!Fields.ContainsKey(eventName))
+            foreach (var source in Sources)
             {
-                var fieldInfo = Source.Target.GetType().GetTypeInfo().GetDeclaredField(eventName);
-                Fields.Add(eventName, fieldInfo);
+                if (source.IsAlive)
+                {
+                    RaiseEvent(source.Target, eventName, eventArgs);
+                }
             }
         }
 
-        public bool RemoveEvent(string eventName)
-        {
-            return Fields.Remove(eventName);
-        }
-
-        protected virtual void RaiseEvents<TArgs>(string eventName, TArgs eventArgs)
+        protected virtual void RaiseEvent<TArgs>(object target, string eventName, TArgs eventArgs)
             where TArgs : EventArgs
         {
             FieldInfo fieldInfo;
             Fields.TryGetValue(eventName, out fieldInfo);
             if (fieldInfo != null)
             {
-                var eventDelegate = (MulticastDelegate)fieldInfo.GetValue(Source.Target);
-                var sourceObj = Source.Target;
+                var eventDelegate = (MulticastDelegate)fieldInfo.GetValue(target);
                 if (eventDelegate != null)
                 {
                     foreach (var handler in eventDelegate.GetInvocationList())
                     {
-                        handler.GetMethodInfo().Invoke(handler.Target, new[] { sourceObj, eventArgs });
+                        handler.GetMethodInfo().Invoke(handler.Target, new[] { target, eventArgs });
                     }
                 }
             }
         }
 
-        public void Dispose()
+        protected void RemoveDeadSources()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            (Sources as List<WeakReference>)?.RemoveAll(x => !x.IsAlive);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void AddEventsInternal()
         {
-            if (_disposed)
-                return;
+            AddEvents();
+        }
 
-            if (disposing)
+        protected void AddEvents()
+        {
+            var typeInfo = typeof(T).GetTypeInfo();
+            var enumerator = typeInfo.DeclaredEvents;
+            foreach (var eventInfo in enumerator)
             {
-                
+                var eventName = eventInfo.Name;
+                var fieldInfo = typeInfo.GetDeclaredField(eventName);
+                Fields.Add(eventName, fieldInfo);
             }
-
-            RaiseEvent -= OnRaiseEvent;
-
-            _disposed = true;
         }
-    }
-
-    public class FieldDictionary<T>
-    {
-        public static FieldDictionary<T> Current { get; } = new FieldDictionary<T>();
-
-        public IDictionary<string, FieldInfo> Fields { get; set; } = new Dictionary<string, FieldInfo>();
     }
 }

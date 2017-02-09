@@ -8,7 +8,7 @@ using Xamarin.Realm.Service.Interfaces;
 
 namespace Xamarin.Realm.Service
 {
-    public abstract class RealmServiceBase<T> : IRealmService<T>, IDisposable
+    public abstract class RealmServiceBase<T> : IRealmService<T>
         where T : RealmObject
     {
         public abstract event EventHandler AddOrUpdateCollectionOccurred;
@@ -21,8 +21,6 @@ namespace Xamarin.Realm.Service
 
         protected IAutoIncrementer<T> AutoIncrementer { get; private set; }
 
-        private bool _disposed;
-
         protected RealmServiceBase(RealmConfigurationBase config = null)
         {
             RealmInstance = Realms.Realm.GetInstance(config);
@@ -33,25 +31,6 @@ namespace Xamarin.Realm.Service
         {
             RealmInstance = Realms.Realm.GetInstance(databasePath);
             InitializeInternal();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    RealmInstance = null;
-                    AutoIncrementer = null;
-                }
-            }
-            _disposed = true;
         }
 
         private void InitializeInternal()

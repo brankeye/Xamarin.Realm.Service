@@ -9,17 +9,18 @@ namespace Xamarin.Realm.Service.Components
     public class EventAggregator<T> : IEventAggregator<T>, IDisposable
         where T : IEventRaiser
     {
-        protected static IDictionary<string, FieldInfo> Fields { get; set; } = new Dictionary<string, FieldInfo>();
+        protected IDictionary<string, FieldInfo> Fields => FieldDictionary<T>.Current.Fields;
 
         protected static event EventHandler<RaiseEventArgs> RaiseEvent;
 
         private bool _disposed;
 
-        private T Source { get; }
+        private WeakReference Source { get; }
 
         public EventAggregator(T source)
         {
-            Source = source;
+            Source = new WeakReference(source);
+            RaiseEvent -= OnRaiseEvent;
             RaiseEvent += OnRaiseEvent;
         }
 
@@ -31,14 +32,14 @@ namespace Xamarin.Realm.Service.Components
         public void Raise<TArgs>(string eventName, TArgs eventArgs)
             where TArgs : EventArgs
         {
-            RaiseEvent?.Invoke(Source, new RaiseEventArgs(eventName, eventArgs));
+            RaiseEvent?.Invoke(Source.Target, new RaiseEventArgs(eventName, eventArgs));
         }
 
         public void AddEvent(string eventName)
         {
             if (!Fields.ContainsKey(eventName))
             {
-                var fieldInfo = Source.GetType().GetTypeInfo().GetDeclaredField(eventName);
+                var fieldInfo = Source.Target.GetType().GetTypeInfo().GetDeclaredField(eventName);
                 Fields.Add(eventName, fieldInfo);
             }
         }
@@ -55,8 +56,8 @@ namespace Xamarin.Realm.Service.Components
             Fields.TryGetValue(eventName, out fieldInfo);
             if (fieldInfo != null)
             {
-                var eventDelegate = (MulticastDelegate)fieldInfo.GetValue(Source);
-                var sourceObj = Source as object;
+                var eventDelegate = (MulticastDelegate)fieldInfo.GetValue(Source.Target);
+                var sourceObj = Source.Target;
                 if (eventDelegate != null)
                 {
                     foreach (var handler in eventDelegate.GetInvocationList())
@@ -87,5 +88,12 @@ namespace Xamarin.Realm.Service.Components
 
             _disposed = true;
         }
+    }
+
+    public class FieldDictionary<T>
+    {
+        public static FieldDictionary<T> Current { get; } = new FieldDictionary<T>();
+
+        public IDictionary<string, FieldInfo> Fields { get; set; } = new Dictionary<string, FieldInfo>();
     }
 }

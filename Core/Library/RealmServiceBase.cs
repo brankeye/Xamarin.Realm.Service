@@ -35,11 +35,6 @@ namespace Xamarin.Realm.Service
             InitializeInternal();
         }
 
-        ~RealmServiceBase()
-        {
-            Dispose(false);
-        }
-
         public void Dispose()
         {
             Dispose(true);

@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using xr.service.samples.helloworld.Shared.Models;
 using xr.service.samples.helloworld.Shared.Services.Realm;
 using Xamarin.Forms;
 using Xamarin.Realm.Service;
+using Xamarin.Realm.Service.Components;
+using Xamarin.Realm.Service.Interfaces;
 
 namespace xr.service.samples.helloworld.Shared
 {

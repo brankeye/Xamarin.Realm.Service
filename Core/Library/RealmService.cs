@@ -87,11 +87,6 @@ namespace Xamarin.Realm.Service
             EventAggregator.AddEvent(nameof(AddOrUpdateCollectionOccurred));
         }
 
-        ~RealmService()
-        {
-            Dispose(false);
-        }
-
         protected virtual IEventAggregator<RealmService<T>> CreateEventAggregator()
         {
             return new EventAggregator<RealmService<T>>(this);
